@@ -603,6 +603,11 @@ tr:first-child td{border-top:none;}
       </section>
 
       <!-- ============ PROFILE ============ -->
+      <div class="card" id="attendanceQrCard">
+  <h3>My Attendance QR Code</h3>
+  <p class="muted">Show this to your instructor to be marked present in a live session.</p>
+  <canvas id="attendanceQr"></canvas>
+</div>
       <section class="page" id="page-profile">
         <div class="page-head">
           <h1>Profile</h1>
@@ -819,6 +824,7 @@ tr:first-child td{border-top:none;}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 <script src="config.js"></script>
 <script src="app.js"></script>
 <script>
