@@ -1,0 +1,36 @@
+/* Add to your existing stylesheet (or a <style> block in index.html) */
+
+.attendance-qr-card {
+  text-align: center;
+  padding: 16px;
+  border: 1px solid #e2e2e2;
+  border-radius: 12px;
+  max-width: 260px;
+  margin: 0 auto;
+}
+.attendance-qr-name { font-weight: 600; margin-top: 8px; }
+.attendance-qr-code { font-family: monospace; letter-spacing: 1px; color: #666; }
+.attendance-qr-hint { font-size: 0.85em; color: #999; }
+
+#qr-reader { position: relative; border-radius: 12px; overflow: hidden; }
+
+.scan-flash {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  background: rgba(0,0,0,0.75);
+  color: #fff;
+  padding: 8px 12px;
+  font-size: 0.9em;
+  text-align: center;
+  transform: translateY(100%);
+  transition: transform 0.2s ease;
+}
+.scan-flash-show { transform: translateY(0); }
+.scan-flash-error { background: rgba(180,30,30,0.85); }
+
+#checked-in-list { list-style: none; padding: 0; margin-top: 12px; }
+#checked-in-list li {
+  display: flex; justify-content: space-between;
+  padding: 6px 0; border-bottom: 1px solid #eee; font-size: 0.9em;
+}
+#checked-in-list li.empty { color: #999; justify-content: center; }
