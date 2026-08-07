@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RENI NOW LEARNING — Admin Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#2A2928; --bg-deep:#201F1E; --surface:#34322F; --surface-2:#3F3D39;
+  --line:#4A4743; --teal:#FFCB74; --gold:#E3A947; --text:#F6F6F6;
+  --muted:#B7B2A8; --muted-2:#85807A; --on-gold:#232120;
+  --good:#8FC98A; --bad:#E68A7A; --info:#9AC2E0;
+  --display:'Space Grotesk',sans-serif; --body:'Inter',sans-serif; --mono:'JetBrains Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:var(--body);line-height:1.5;}
+a{color:inherit;}
+button,input,select,textarea{font-family:inherit;}
+::-webkit-scrollbar{width:10px;height:10px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--line);border-radius:20px;}
+
+.wrap{max-width:1100px;margin:0 auto;padding:28px 20px 80px;}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;}
+.brand{display:flex;align-items:center;gap:10px;}
+.brand-mark{width:38px;height:38px;border-radius:10px;background:var(--teal);display:flex;align-items:center;justify-content:center;color:var(--on-gold);font-family:var(--display);font-weight:700;}
+.brand h1{font-family:var(--display);font-size:19px;font-weight:700;}
+.brand span{display:block;font-size:11px;color:var(--muted);letter-spacing:.4px;text-transform:uppercase;}
+.top-actions{display:flex;gap:10px;align-items:center;}
+.top-actions a{font-size:13px;color:var(--muted);}
+.top-actions a:hover{color:var(--teal);}
+
+.gate{max-width:380px;margin:80px auto;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:28px;}
+.gate h2{font-family:var(--display);font-size:20px;margin-bottom:6px;}
+.gate p{color:var(--muted);font-size:13px;margin-bottom:18px;}
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:11px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+.field input,.field select,.field textarea{
+  width:100%;background:var(--bg-deep);border:1px solid var(--line);border-radius:9px;
+  color:var(--text);padding:10px 12px;font-size:14px;
+}
+.field textarea{resize:vertical;min-height:70px;}
+.btn{
+  background:var(--teal);color:var(--on-gold);border:none;border-radius:9px;padding:10px 16px;
+  font-weight:600;font-size:14px;cursor:pointer;
+}
+.btn:hover{filter:brightness(1.06);}
+.btn.secondary{background:var(--surface-2);color:var(--text);border:1px solid var(--line);}
+.btn.danger{background:var(--bad);color:#2a1a17;}
+.btn.small{padding:6px 10px;font-size:12px;border-radius:7px;}
+.msg{font-size:13px;margin-bottom:10px;}
+.msg.bad{color:var(--bad);} .msg.good{color:var(--good);}
+
+.tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
+.tab-btn{background:var(--surface);border:1px solid var(--line);color:var(--muted);padding:8px 14px;border-radius:999px;font-size:13px;font-weight:600;cursor:pointer;}
+.tab-btn.active{background:var(--teal);color:var(--on-gold);border-color:var(--teal);}
+.panel{display:none;} .panel.active{display:block;}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:20px;}
+.card h3{font-family:var(--display);font-size:15px;margin-bottom:14px;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.form-grid .full{grid-column:1/-1;}
+
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{text-align:left;color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.4px;padding:8px 10px;border-bottom:1px solid var(--line);}
+td{padding:10px;border-bottom:1px solid var(--line);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+.pill{display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:600;}
+.pill-ok{background:rgba(143,201,138,.15);color:var(--good);}
+.pill-bad{background:rgba(230,138,122,.15);color:var(--bad);}
+.pill-role{background:var(--surface-2);color:var(--muted);}
+.row-actions{display:flex;gap:6px;flex-wrap:wrap;}
+.table-wrap{overflow-x:auto;}
+
+.qr-modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:100;}
+.qr-modal.show{display:flex;}
+.qr-modal .box{background:var(--surface);border-radius:14px;padding:24px;text-align:center;max-width:340px;}
+.qr-modal img{width:240px;height:240px;background:#fff;border-radius:8px;margin-bottom:12px;}
+.qr-modal p{color:var(--muted);font-size:12px;margin-bottom:14px;word-break:break-all;}
+</style>
+</head>
+<body>
+
+<div class="gate" id="authGate">
+  <h2>Admin Console</h2>
+  <p>Sign in with an instructor/admin RENI NOW LEARNING account.</p>
+  <div class="msg" id="authMsg"></div>
+  <form id="loginForm">
+    <div class="field"><label>Email</label><input type="email" id="loginEmail" required></div>
+    <div class="field"><label>Password</label><input type="password" id="loginPassword" required></div>
+    <button class="btn" type="submit" style="width:100%;">Log in</button>
+  </form>
+</div>
+
+<div class="wrap" id="appRoot" style="display:none;">
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-mark">R</div>
+      <div><h1>RENI NOW LEARNING</h1><span>Admin console</span></div>
+    </div>
+    <div class="top-actions">
+      <a href="/index.html">← Student dashboard</a>
+      <button class="btn secondary small" id="logoutBtn">Log out</button>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="students">Students</button>
+    <button class="tab-btn" data-tab="assignments">Assignments</button>
+    <button class="tab-btn" data-tab="sessions">Classes</button>
+    <button class="tab-btn" data-tab="letters">Recognition letters</button>
+  </div>
+
+  <!-- STUDENTS -->
+  <div class="panel active" id="panel-students">
+    <div class="card">
+      <h3>All students</h3>
+      <div class="msg" id="studentsMsg"></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Status</th><th>Member since</th><th>Actions</th></tr></thead>
+          <tbody id="studentsBody"><tr><td colspan="7">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ASSIGNMENTS -->
+  <div class="panel" id="panel-assignments">
+    <div class="card">
+      <h3>Post a new assignment</h3>
+      <div class="msg" id="assignmentMsg"></div>
+      <form id="assignmentForm">
+        <div class="form-grid">
+          <div class="field full"><label>Title</label><input type="text" id="asgTitle" required></div>
+          <div class="field full"><label>Description</label><textarea id="asgDesc"></textarea></div>
+          <div class="field"><label>Roadmap</label><select id="asgRoadmap"><option value="">— none —</option></select></div>
+          <div class="field"><label>Max score</label><input type="number" id="asgMaxScore" value="100"></div>
+          <div class="field"><label>Due date</label><input type="datetime-local" id="asgDue"></div>
+          <div class="field"><label>Published</label><select id="asgPublished"><option value="true">Yes</option><option value="false">No (draft)</option></select></div>
+        </div>
+        <button class="btn" type="submit" style="margin-top:6px;">Post assignment</button>
+      </form>
+    </div>
+    <div class="card">
+      <h3>All assignments</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Title</th><th>Roadmap</th><th>Due</th><th>Max score</th><th>Published</th></tr></thead>
+          <tbody id="assignmentsBody"><tr><td colspan="5">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- SESSIONS / CLASSES -->
+  <div class="panel" id="panel-sessions">
+    <div class="card">
+      <h3>Schedule a live class</h3>
+      <div class="msg" id="sessionMsg"></div>
+      <form id="sessionForm">
+        <div class="form-grid">
+          <div class="field full"><label>Title</label><input type="text" id="sesTitle" required></div>
+          <div class="field"><label>Instructor name</label><input type="text" id="sesInstructor"></div>
+          <div class="field"><label>Roadmap</label><select id="sesRoadmap"><option value="">— none —</option></select></div>
+          <div class="field"><label>Starts at</label><input type="datetime-local" id="sesStarts" required></div>
+          <div class="field"><label>Ends at</label><input type="datetime-local" id="sesEnds"></div>
+          <div class="field full"><label>Meeting link (Zoom/Meet/etc.)</label><input type="url" id="sesUrl" placeholder="https://..."></div>
+        </div>
+        <button class="btn" type="submit" style="margin-top:6px;">Schedule class</button>
+      </form>
+    </div>
+    <div class="card">
+      <h3>All classes</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Title</th><th>Roadmap</th><th>Instructor</th><th>Starts</th><th>Link</th></tr></thead>
+          <tbody id="sessionsBody"><tr><td colspan="5">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- RECOGNITION LETTERS -->
+  <div class="panel" id="panel-letters">
+    <div class="card">
+      <h3>Issue a recognition letter</h3>
+      <div class="msg" id="letterMsg"></div>
+      <form id="letterForm">
+        <div class="form-grid">
+          <div class="field full"><label>Student</label><select id="letStudent" required><option value="">Select a student…</option></select></div>
+          <div class="field"><label>Roadmap / course</label><select id="letRoadmap"><option value="">— none —</option></select></div>
+          <div class="field"><label>Duration</label><input type="text" id="letDuration" placeholder="e.g. 8 weeks"></div>
+          <div class="field"><label>Completed on</label><input type="date" id="letCompleted"></div>
+          <div class="field"><label>Director name</label><input type="text" id="letDirector" placeholder="R. Sharma"></div>
+        </div>
+        <button class="btn" type="submit" style="margin-top:6px;">Issue letter</button>
+      </form>
+    </div>
+    <div class="card">
+      <h3>Issued letters</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Student</th><th>Course</th><th>Code</th><th>Issued</th><th>QR</th></tr></thead>
+          <tbody id="lettersBody"><tr><td colspan="5">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="qr-modal" id="qrModal">
+  <div class="box">
+    <img id="qrModalImg" src="" alt="QR code">
+    <p id="qrModalLabel"></p>
+    <button class="btn secondary small" onclick="document.getElementById('qrModal').classList.remove('show')">Close</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="config.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>

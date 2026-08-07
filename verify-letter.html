@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Certificate verification — RENI NOW LEARNING</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  body{background:#2A2928;color:#F6F6F6;font-family:'Inter',sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:20px;}
+  .card{background:#34322F;border:1px solid #4A4743;border-radius:16px;padding:32px;max-width:400px;width:100%;text-align:center;}
+  .badge{width:56px;height:56px;border-radius:50%;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:26px;}
+  .ok{background:rgba(143,201,138,.15);}
+  .bad{background:rgba(230,138,122,.15);}
+  h1{font-family:'Space Grotesk',sans-serif;font-size:18px;margin-bottom:4px;}
+  p{color:#B7B2A8;font-size:13px;margin-top:4px;}
+  .name{font-family:'Space Grotesk',sans-serif;font-size:22px;margin:14px 0 2px;}
+  .row{display:flex;justify-content:space-between;font-size:13px;padding:8px 0;border-bottom:1px solid #4A4743;text-align:left;}
+  .row:last-child{border-bottom:none;}
+  .row span:first-child{color:#85807A;}
+  .details{margin-top:18px;}
+  .code{font-family:monospace;color:#FFCB74;}
+</style>
+</head>
+<body>
+  <div class="card" id="card">
+    <p>Checking…</p>
+  </div>
+<script>
+  const code = new URLSearchParams(location.search).get('code');
+  const card = document.getElementById('card');
+  const fmt = (d) => d ? new Date(d).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' }) : '—';
+
+  if (!code) {
+    card.innerHTML = '<div class="badge bad">✕</div><h1>No certificate code specified</h1>';
+  } else {
+    fetch('/api/letters/verify/' + encodeURIComponent(code))
+      .then(r => r.json())
+      .then(data => {
+        if (!data.valid) {
+          card.innerHTML = '<div class="badge bad">✕</div><h1>Not found</h1><p>This certificate code does not match any RENI NOW LEARNING recognition letter.</p>';
+          return;
+        }
+        card.innerHTML = `
+          <div class="badge ok">✓</div>
+          <h1>Genuine certificate</h1>
+          <div class="name">${data.profiles?.full_name || 'Student'}</div>
+          <div class="details">
+            <div class="row"><span>Course</span><span>${data.roadmaps?.title || '—'}</span></div>
+            <div class="row"><span>Duration</span><span>${data.duration_label || '—'}</span></div>
+            <div class="row"><span>Completed on</span><span>${fmt(data.completed_on)}</span></div>
+            <div class="row"><span>Issued</span><span>${fmt(data.issued_at)}</span></div>
+            <div class="row"><span>Signed by</span><span>${data.director_name || '—'}</span></div>
+            <div class="row"><span>Code</span><span class="code">${data.recognition_code}</span></div>
+          </div>
+        `;
+      })
+      .catch(() => {
+        card.innerHTML = '<div class="badge bad">✕</div><h1>Could not verify</h1><p>Please try again later.</p>';
+      });
+  }
+</script>
+</body>
+</html>
