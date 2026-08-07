@@ -638,6 +638,17 @@
       authError.textContent = err.message || 'Could not sign in.';
     }
   })();
+  async function renderAttendanceQr(userId) {
+  const canvas = document.getElementById('attendanceQr');
+  if (!canvas) return;
+  // QR payload is simply the student's own auth.uid() — nothing sensitive,
+  // and the admin scanner can only write attendance, not read anything else with it.
+  await QRCode.toCanvas(canvas, userId, { width: 220, margin: 1 });
+}
+
+// call it once you have the current user, e.g.:
+// const { data: { user } } = await sb.auth.getUser();
+// renderAttendanceQr(user.id);
 
   // expose a small surface for the inline nav script in index.html
   window.Reni = {
