@@ -94,7 +94,7 @@
   async function fetchAssignments() {
     const { data, error } = await sb
       .from("assignments")
-      .select("*, roadmaps(title), assignment_submissions(status, submitted_at, score, student_id)")
+      .select("*, roadmaps(title), assignment_submissions(status, submitted_at, score, feedback, content, file_url, student_id)")
       .order("due_at", { ascending: true });
     if (error) { console.error(error); return []; }
     // keep only this student's submission row (RLS already limits to own, but be defensive)
@@ -102,6 +102,37 @@
       ...a,
       mySubmission: (a.assignment_submissions || [])[0] || null
     }));
+  }
+
+  // ------------------------------------------------------------
+  // ASSIGNMENT SUBMISSION (file upload to Supabase Storage)
+  // ------------------------------------------------------------
+  async function submitAssignment(assignmentId, file, notes) {
+    let filePath = null;
+    if (file) {
+      const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, "_");
+      filePath = `${currentUser.id}/${assignmentId}/${Date.now()}-${safeName}`;
+      const { error: upErr } = await sb.storage.from("submission-files").upload(filePath, file, { upsert: true });
+      if (upErr) throw upErr;
+    }
+    const payload = {
+      assignment_id: assignmentId,
+      student_id: currentUser.id,
+      status: "submitted",
+      content: notes || null,
+      submitted_at: new Date().toISOString()
+    };
+    if (filePath) payload.file_url = filePath;
+    const { error } = await sb
+      .from("assignment_submissions")
+      .upsert(payload, { onConflict: "assignment_id,student_id" });
+    if (error) throw error;
+  }
+
+  async function getSignedSubmissionUrl(path) {
+    const { data, error } = await sb.storage.from("submission-files").createSignedUrl(path, 3600);
+    if (error) { console.error(error); return null; }
+    return data.signedUrl;
   }
 
   async function fetchAssessments() {
@@ -306,15 +337,88 @@
         : status === 'submitted'
           ? `${a.roadmaps?.title || ''} · Submitted ${fmtDate(a.mySubmission.submitted_at)}`
           : `${a.roadmaps?.title || ''} · ${relativeDue(a.due_at)}`;
+      const attachment = a.attachment_url
+        ? `<a class="attachment-link" href="${a.attachment_url}" target="_blank" rel="noopener">📎 ${a.attachment_name || 'Assignment file'}</a>`
+        : '';
+      const feedback = (status === 'graded' && a.mySubmission?.feedback)
+        ? `<div class="list-row-sub" style="margin-top:4px;">Feedback: ${a.mySubmission.feedback}</div>`
+        : '';
+      const mySubmissionLink = a.mySubmission?.file_url
+        ? `<button class="attachment-link" style="border:none;background:none;padding:0;" data-view-submission="${a.mySubmission.file_url}">📄 View my submitted file</button>`
+        : '';
+      const canSubmit = status !== 'graded';
       return `
-        <div class="list-row">
-          <div class="list-row-main">
-            <div class="list-row-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6M9 16h6M8 4H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-2"/></svg></div>
-            <div><div class="list-row-title">${a.title}</div><div class="list-row-sub">${sub}</div></div>
+        <div class="list-row" style="flex-direction:column;align-items:stretch;">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;width:100%;">
+            <div class="list-row-main">
+              <div class="list-row-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6M9 16h6M8 4H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-2"/></svg></div>
+              <div>
+                <div class="list-row-title">${a.title}</div>
+                <div class="list-row-sub">${sub}</div>
+                ${attachment}${feedback}${mySubmissionLink}
+              </div>
+            </div>
+            <span class="pill ${pillClass}">${status.charAt(0).toUpperCase() + status.slice(1)}</span>
           </div>
-          <span class="pill ${pillClass}">${status.charAt(0).toUpperCase() + status.slice(1)}</span>
+          ${canSubmit ? `
+          <div class="submit-wrap">
+            <div class="submit-row">
+              <label class="btn btn-outline btn-sm file-input-btn">Choose file<input type="file" data-submit-file="${a.id}"></label>
+              <span class="file-name" data-file-name="${a.id}">No file chosen</span>
+              <input type="text" class="notes-input" placeholder="Notes (optional)" data-submit-notes="${a.id}">
+              <button class="btn btn-primary btn-sm" data-submit-btn="${a.id}">${status === 'submitted' ? 'Resubmit' : 'Submit'}</button>
+            </div>
+            <p class="submit-msg" data-submit-msg="${a.id}"></p>
+          </div>` : ''}
         </div>`;
     }).join('') || `<div class="list-row"><span style="color:var(--muted);font-size:13.5px;">No assignments yet.</span></div>`;
+
+    list.querySelectorAll('[data-submit-file]').forEach(input => {
+      input.addEventListener('change', () => {
+        const id = input.dataset.submitFile;
+        const nameEl = list.querySelector(`[data-file-name="${id}"]`);
+        nameEl.textContent = input.files[0] ? input.files[0].name : 'No file chosen';
+      });
+    });
+
+    list.querySelectorAll('[data-submit-btn]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.dataset.submitBtn;
+        const fileInput = list.querySelector(`[data-submit-file="${id}"]`);
+        const notesInput = list.querySelector(`[data-submit-notes="${id}"]`);
+        const msgEl = list.querySelector(`[data-submit-msg="${id}"]`);
+        const file = fileInput.files[0] || null;
+        const notes = notesInput.value.trim();
+        if (!file && !notes) {
+          msgEl.textContent = 'Attach a file or add a note first.';
+          msgEl.className = 'submit-msg err';
+          return;
+        }
+        const original = btn.textContent;
+        btn.textContent = 'Submitting…'; btn.disabled = true;
+        try {
+          await submitAssignment(id, file, notes);
+          await renderAssignments();
+          await renderTopbarAndDashboard();
+        } catch (e) {
+          console.error(e);
+          msgEl.textContent = e.message || 'Could not submit. Try again.';
+          msgEl.className = 'submit-msg err';
+          btn.textContent = original; btn.disabled = false;
+        }
+      });
+    });
+
+    list.querySelectorAll('[data-view-submission]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const original = btn.textContent;
+        btn.textContent = 'Opening…';
+        const url = await getSignedSubmissionUrl(btn.dataset.viewSubmission);
+        btn.textContent = original;
+        if (url) window.open(url, '_blank');
+        else alert('Could not open that file.');
+      });
+    });
   }
 
   async function renderAssessments() {
