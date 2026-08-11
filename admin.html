@@ -215,6 +215,8 @@ tr:first-child td{border-top:none;}
               <div class="field"><label>Due date</label><input id="as_due" type="datetime-local"></div>
               <div class="field"><label>Max score</label><input id="as_max" type="number" value="100"></div>
               <div class="field field-check"><input type="checkbox" id="as_published" checked><label style="text-transform:none;font-size:13px;">Published</label></div>
+              <div class="field span2"><label>Attachment (PDF or any file)</label><input type="file" id="as_file"></div>
+              <div class="field"><label>Current attachment</label><div id="as_current_file" class="muted" style="font-size:12.5px;padding-top:8px;">None</div></div>
               <div class="field span3"><label>Description</label><textarea id="as_desc" rows="2"></textarea></div>
             </div>
             <div class="form-actions">
@@ -237,8 +239,8 @@ tr:first-child td{border-top:none;}
             <select id="gradeAssignmentPicker" style="width:auto;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg-deep);color:var(--text);"></select>
           </div>
           <div class="table-wrap"><table>
-            <thead><tr><th>Student</th><th>Status</th><th>Submitted</th><th>Score</th><th>Feedback</th><th>Award XP</th><th></th></tr></thead>
-            <tbody id="submissionsTable"><tr><td colspan="7" class="muted">Pick an assignment above.</td></tr></tbody>
+            <thead><tr><th>Student</th><th>Status</th><th>Submitted</th><th>File</th><th>Score</th><th>Feedback</th><th>Award XP</th><th></th></tr></thead>
+            <tbody id="submissionsTable"><tr><td colspan="8" class="muted">Pick an assignment above.</td></tr></tbody>
           </table></div>
         </div>
       </section>
