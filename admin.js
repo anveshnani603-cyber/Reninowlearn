@@ -437,8 +437,17 @@
     tbody.innerHTML = sessions.map(s => `
       <tr>
         <td>${esc(s.title)}</td><td class="muted">${esc(s.instructor_name || '—')}</td><td>${fmtDate(s.starts_at)}</td>
-        <td><button class="btn btn-outline btn-sm" data-edit-sess="${s.id}">Edit</button> <button class="btn btn-danger btn-sm" data-del-sess="${s.id}">Delete</button></td>
+        <td>
+          <button class="btn btn-outline btn-sm" data-scan-sess="${s.id}">Scan attendance</button>
+          <button class="btn btn-outline btn-sm" data-edit-sess="${s.id}">Edit</button>
+          <button class="btn btn-danger btn-sm" data-del-sess="${s.id}">Delete</button>
+        </td>
       </tr>`).join('') || '<tr><td colspan="4" class="muted">No sessions yet.</td></tr>';
+
+    tbody.querySelectorAll('[data-scan-sess]').forEach(b => b.addEventListener('click', () => {
+      const s = sessions.find(x => x.id === b.dataset.scanSess);
+      openAttendanceModal(s);
+    }));
 
     tbody.querySelectorAll('[data-edit-sess]').forEach(b => b.addEventListener('click', () => {
       const s = sessions.find(x => x.id === b.dataset.editSess);
@@ -480,6 +489,41 @@
   });
   document.getElementById('sess_cancel').addEventListener('click', () => {
     document.getElementById('sessForm').reset(); document.getElementById('sess_id').value = '';
+  });
+
+  // ------------------------------------------------------------
+  // ATTENDANCE SCANNER (QR check-in for the session currently in progress)
+  // ------------------------------------------------------------
+  let attendanceScanner = null;
+
+  async function openAttendanceModal(session) {
+    document.getElementById('attendanceModalSession').textContent =
+      `${session.title} — ${fmtDate(session.starts_at)}`;
+    document.getElementById('attendanceModal').classList.add('open');
+
+    attendanceScanner = new AdminAttendanceScanner(sb, session.id, 'qr-reader', 'checked-in-list');
+    try {
+      await attendanceScanner.start();
+    } catch (err) {
+      const readerEl = document.getElementById('qr-reader');
+      readerEl.innerHTML = `<p class="muted" style="padding:16px;text-align:center;">
+        Could not access the camera: ${esc(err.message || err)}. Check camera permissions and try again.
+      </p>`;
+    }
+  }
+
+  async function closeAttendanceModal() {
+    document.getElementById('attendanceModal').classList.remove('open');
+    if (attendanceScanner) {
+      try { await attendanceScanner.stop(); } catch (e) { /* already stopped */ }
+      attendanceScanner = null;
+    }
+    document.getElementById('qr-reader').innerHTML = '';
+  }
+
+  document.getElementById('attendanceModalClose').addEventListener('click', closeAttendanceModal);
+  document.getElementById('attendanceModal').addEventListener('click', (e) => {
+    if (e.target.id === 'attendanceModal') closeAttendanceModal();
   });
 
   // ------------------------------------------------------------
