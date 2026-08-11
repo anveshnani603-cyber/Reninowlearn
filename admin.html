@@ -98,6 +98,25 @@ td{padding:12px 14px;border-top:1px solid var(--line);font-size:13.5px;vertical-
 tr:first-child td{border-top:none;}
 .table-wrap{overflow-x:auto;}
 .muted{color:var(--muted);font-size:13px;}
+
+/* ---- Attendance scanner modal ---- */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:150;
+  align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.open{display:flex;}
+.modal-box{background:var(--surface);border:1px solid var(--line);border-radius:16px;
+  padding:22px;width:100%;max-width:420px;max-height:88vh;overflow-y:auto;}
+.modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+#qr-reader{position:relative;border-radius:12px;overflow:hidden;background:var(--bg-deep);}
+.scan-flash{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.8);color:#fff;
+  padding:8px 12px;font-size:12.5px;text-align:center;transform:translateY(100%);transition:transform .2s ease;}
+.scan-flash-show{transform:translateY(0);}
+.scan-flash-error{background:rgba(230,138,122,.9);color:#2A1F1D;}
+#checked-in-list{list-style:none;padding:0;margin-top:8px;max-height:220px;overflow-y:auto;}
+#checked-in-list li{display:flex;justify-content:space-between;gap:10px;padding:8px 2px;
+  border-top:1px solid var(--line);font-size:13px;}
+#checked-in-list li:first-child{border-top:none;}
+#checked-in-list li time{color:var(--muted);font-size:12px;white-space:nowrap;}
+#checked-in-list li.empty{justify-content:center;color:var(--muted);}
 .pill{font-family:var(--mono);font-size:10.5px;padding:4px 10px;border-radius:100px;white-space:nowrap;}
 .pill-pending{background:rgba(255,180,84,.12);color:#FFB454;}
 .pill-submitted{background:rgba(154,194,224,.12);color:var(--info);}
@@ -319,6 +338,23 @@ tr:first-child td{border-top:none;}
         </div>
       </section>
 
+      <!-- ATTENDANCE SCANNER MODAL -->
+      <div class="modal-overlay" id="attendanceModal">
+        <div class="modal-box">
+          <div class="modal-head">
+            <div>
+              <div class="panel-title" style="margin:0;">Scan attendance</div>
+              <p class="muted" id="attendanceModalSession" style="font-size:12.5px;margin-top:2px;">—</p>
+            </div>
+            <button class="btn btn-outline btn-sm" id="attendanceModalClose">Close</button>
+          </div>
+          <div id="qr-reader" style="width:100%;max-width:320px;margin:16px auto;"></div>
+          <p class="muted" style="font-size:12.5px;text-align:center;">Point the camera at a student's attendance QR code to mark them present.</p>
+          <div class="panel-title" style="margin-top:18px;">Checked in</div>
+          <ul id="checked-in-list"></ul>
+        </div>
+      </div>
+
       <!-- CONTENT -->
       <section class="page" id="page-content">
         <div class="page-head"><h1>Content Library</h1><p>Recordings, notes, and practice material.</p></div>
@@ -374,7 +410,9 @@ tr:first-child td{border-top:none;}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script src="config.js"></script>
+<script src="attendance.js"></script>
 <script src="admin.js"></script>
 </body>
 </html>
