@@ -224,6 +224,123 @@
   };
 
   // ------------------------------------------------------------
+  // NOTIFICATIONS (new assignments + upcoming live sessions)
+  // ------------------------------------------------------------
+  let notifSeenAt = null;
+  let notifKnownIds = new Set();
+  let notifPollStarted = false;
+
+  const notifSeenKey = () => `reni_notif_seen_${currentUser?.id || 'anon'}`;
+
+  function loadNotifSeenAt() {
+    const stored = localStorage.getItem(notifSeenKey());
+    if (stored) return new Date(stored);
+    // First time opening the app: don't flag everything ever posted as unread,
+    // just the last 7 days, so existing students aren't flooded.
+    return new Date(Date.now() - 7 * 86400000);
+  }
+
+  function saveNotifSeenAt(date) {
+    notifSeenAt = date;
+    localStorage.setItem(notifSeenKey(), date.toISOString());
+  }
+
+  async function buildNotifications() {
+    const [assignments, sessions] = await Promise.all([fetchAssignments(), fetchSessions()]);
+    const items = [];
+    assignments.forEach(a => {
+      items.push({
+        id: `assignment-${a.id}`,
+        type: 'assignment',
+        title: a.title,
+        sub: a.due_at ? `New assignment · Due ${fmtDate(a.due_at)}` : 'New assignment posted',
+        createdAt: new Date(a.created_at || a.due_at || Date.now())
+      });
+    });
+    sessions.forEach(s => {
+      if (new Date(s.starts_at) < new Date()) return; // skip sessions already over
+      items.push({
+        id: `session-${s.id}`,
+        type: 'session',
+        title: s.title,
+        sub: `Live session · ${fmtDateTime(s.starts_at)}`,
+        createdAt: new Date(s.created_at || s.starts_at)
+      });
+    });
+    items.sort((a, b) => b.createdAt - a.createdAt);
+    return items.slice(0, 25);
+  }
+
+  function notifIcon(type) {
+    return type === 'session'
+      ? '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>'
+      : '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3h6l3 5v11a2 2 0 01-2 2H8a2 2 0 01-2-2V8z"/><path d="M9 12h6M9 16h6"/></svg>';
+  }
+
+  function renderNotifPanel(items) {
+    const list = document.getElementById('notifList');
+    if (!list) return;
+    if (!items.length) {
+      list.innerHTML = `<div class="notif-empty">No assignments or sessions yet.</div>`;
+      return;
+    }
+    list.innerHTML = items.map(item => `
+      <div class="notif-item ${item.createdAt > notifSeenAt ? 'unread' : ''}">
+        <div class="notif-item-icon">${notifIcon(item.type)}</div>
+        <div>
+          <div class="notif-item-title">${item.title}</div>
+          <div class="notif-item-sub">${item.sub}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function showNotifToast(item) {
+    const stack = document.getElementById('notifToastStack');
+    if (!stack) return;
+    const toast = document.createElement('div');
+    toast.className = 'notif-toast';
+    toast.innerHTML = `
+      <div class="notif-toast-icon">${notifIcon(item.type)}</div>
+      <div>
+        <div class="notif-toast-title">${item.type === 'session' ? 'New live session' : 'New assignment'}</div>
+        <div class="notif-toast-sub">${item.title}</div>
+      </div>
+      <button class="notif-toast-close" aria-label="Dismiss">✕</button>
+    `;
+    toast.querySelector('.notif-toast-close').addEventListener('click', () => toast.remove());
+    stack.appendChild(toast);
+    setTimeout(() => toast.remove(), 8000);
+  }
+
+  // announceNew: pop a toast for items that appeared since the last poll
+  async function refreshNotifications({ announceNew } = {}) {
+    if (notifSeenAt === null) notifSeenAt = loadNotifSeenAt();
+    const items = await buildNotifications();
+
+    if (announceNew && notifKnownIds.size) {
+      items.forEach(item => {
+        if (!notifKnownIds.has(item.id) && item.createdAt > notifSeenAt) {
+          showNotifToast(item);
+        }
+      });
+    }
+    notifKnownIds = new Set(items.map(i => i.id));
+
+    const dot = document.getElementById('notifDot');
+    const hasUnread = items.some(i => i.createdAt > notifSeenAt);
+    if (dot) dot.style.display = hasUnread ? 'block' : 'none';
+
+    renderNotifPanel(items);
+
+    if (!notifPollStarted) {
+      notifPollStarted = true;
+      setInterval(() => refreshNotifications({ announceNew: true }), 60000);
+    }
+    return items;
+  }
+
+  // ------------------------------------------------------------
   // RENDERERS
   // ------------------------------------------------------------
   async function renderTopbarAndDashboard() {
@@ -597,6 +714,7 @@
     await renderSessions();
     await renderContent();
     await renderProfilePage();
+    await refreshNotifications();
   }
 
   // Re-render just the page being switched to, so data stays fresh without refetching everything.
@@ -717,6 +835,31 @@
       btn.textContent = 'Failed — retry';
     } finally {
       setTimeout(() => { btn.textContent = original; }, 1500);
+    }
+  });
+
+  document.getElementById('notifBtn').addEventListener('click', async (e) => {
+    e.stopPropagation();
+    const panel = document.getElementById('notifPanel');
+    panel.classList.toggle('open');
+    if (panel.classList.contains('open')) {
+      await refreshNotifications();
+    }
+  });
+
+  document.getElementById('notifMarkRead').addEventListener('click', (e) => {
+    e.stopPropagation();
+    saveNotifSeenAt(new Date());
+    const dot = document.getElementById('notifDot');
+    if (dot) dot.style.display = 'none';
+    document.querySelectorAll('.notif-item.unread').forEach(el => el.classList.remove('unread'));
+  });
+
+  document.addEventListener('click', (e) => {
+    const wrap = document.getElementById('notifWrap');
+    const panel = document.getElementById('notifPanel');
+    if (wrap && panel && !wrap.contains(e.target)) {
+      panel.classList.remove('open');
     }
   });
 
