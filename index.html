@@ -322,6 +322,17 @@ tr:first-child td{border-top:none;}
   .letter-sign-row{flex-direction:column;align-items:flex-start;}
 }
 
+/* ---------- ASSIGNMENT SUBMISSION ---------- */
+.submit-wrap{padding:14px 20px;border-top:1px dashed var(--line);background:var(--surface-2);}
+.submit-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+.file-input-btn{position:relative;overflow:hidden;display:inline-flex;}
+.file-input-btn input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;}
+.file-name{font-size:12.5px;color:var(--muted);}
+.notes-input{flex:1;min-width:160px;padding:9px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg-deep);color:var(--text);font-size:13px;}
+.submit-msg{font-size:12px;margin-top:8px;min-height:14px;}
+.submit-msg.ok{color:var(--good);} .submit-msg.err{color:var(--bad);}
+.attachment-link{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;color:var(--teal);margin-top:4px;}
+
 /* ---------- AUTH GATE ---------- */
 .auth-gate{position:fixed;inset:0;background:var(--bg-deep);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px;}
 .auth-card{width:100%;max-width:400px;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:32px;}
