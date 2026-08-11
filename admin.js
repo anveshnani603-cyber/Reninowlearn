@@ -247,6 +247,10 @@
       document.getElementById('as_max').value = a.max_score;
       document.getElementById('as_published').checked = a.published;
       document.getElementById('as_desc').value = a.description || '';
+      document.getElementById('as_file').value = '';
+      document.getElementById('as_current_file').innerHTML = a.attachment_url
+        ? `<a href="${a.attachment_url}" target="_blank" style="color:var(--teal);">${esc(a.attachment_name || 'View file')}</a>`
+        : 'None';
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }));
     tbody.querySelectorAll('[data-del-as]').forEach(b => b.addEventListener('click', async () => {
@@ -259,6 +263,7 @@
   document.getElementById('assignForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const id = document.getElementById('as_id').value;
+    const msg = document.getElementById('as_msg');
     const payload = {
       title: document.getElementById('as_title').value.trim(),
       roadmap_id: document.getElementById('as_roadmap').value || null,
@@ -267,11 +272,24 @@
       published: document.getElementById('as_published').checked,
       description: document.getElementById('as_desc').value.trim()
     };
-    const msg = document.getElementById('as_msg');
+
+    const file = document.getElementById('as_file').files[0];
+    if (file) {
+      msg.textContent = 'Uploading attachment…'; msg.className = 'msg';
+      const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+      const path = `${id || 'new'}/${Date.now()}-${safeName}`;
+      const { error: upErr } = await sb.storage.from('assignment-materials').upload(path, file, { upsert: true });
+      if (upErr) { msg.textContent = upErr.message; msg.className = 'msg err'; return; }
+      const { data: pub } = sb.storage.from('assignment-materials').getPublicUrl(path);
+      payload.attachment_url = pub.publicUrl;
+      payload.attachment_name = file.name;
+    }
+
     const { error } = id ? await sb.from('assignments').update(payload).eq('id', id) : await sb.from('assignments').insert(payload);
     if (error) { msg.textContent = error.message; msg.className = 'msg err'; return; }
     msg.textContent = 'Saved.'; msg.className = 'msg ok';
     document.getElementById('assignForm').reset(); document.getElementById('as_id').value = '';
+    document.getElementById('as_current_file').textContent = 'None';
     await loadAssignments(); await loadOverview();
   });
   document.getElementById('as_cancel').addEventListener('click', () => {
@@ -281,21 +299,33 @@
   document.getElementById('gradeAssignmentPicker').addEventListener('change', async (e) => {
     const assignmentId = e.target.value;
     const tbody = document.getElementById('submissionsTable');
-    if (!assignmentId) { tbody.innerHTML = '<tr><td colspan="7" class="muted">Pick an assignment above.</td></tr>'; return; }
-    tbody.innerHTML = '<tr><td colspan="7" class="muted">Loading…</td></tr>';
+    if (!assignmentId) { tbody.innerHTML = '<tr><td colspan="8" class="muted">Pick an assignment above.</td></tr>'; return; }
+    tbody.innerHTML = '<tr><td colspan="8" class="muted">Loading…</td></tr>';
     const { data, error } = await sb.from('assignment_submissions').select('*, profiles(full_name)').eq('assignment_id', assignmentId);
-    if (error) { tbody.innerHTML = `<tr><td colspan="7" class="muted">${esc(error.message)}</td></tr>`; return; }
-    if (!data || !data.length) { tbody.innerHTML = '<tr><td colspan="7" class="muted">No submissions yet.</td></tr>'; return; }
+    if (error) { tbody.innerHTML = `<tr><td colspan="8" class="muted">${esc(error.message)}</td></tr>`; return; }
+    if (!data || !data.length) { tbody.innerHTML = '<tr><td colspan="8" class="muted">No submissions yet.</td></tr>'; return; }
     tbody.innerHTML = data.map(s => `
       <tr data-sub-row="${s.id}" data-student="${s.student_id}">
         <td>${esc(s.profiles?.full_name || 'Student')}</td>
         <td><span class="pill pill-${s.status}">${s.status}</span></td>
         <td>${fmtDate(s.submitted_at)}</td>
+        <td>${s.file_url ? `<button class="btn btn-outline btn-sm" data-view-file="${s.file_url}">View file</button>` : '<span class="muted">—</span>'}</td>
         <td><input class="score-input" type="number" data-score value="${s.score ?? ''}"></td>
         <td><input type="text" data-feedback value="${esc(s.feedback || '')}" style="min-width:140px;padding:6px 8px;border-radius:6px;border:1px solid var(--line);background:var(--bg-deep);color:var(--text);"></td>
         <td><input class="score-input" type="number" data-xp placeholder="XP"></td>
         <td><button class="btn btn-primary btn-sm" data-save-grade="${s.id}">Save</button></td>
       </tr>`).join('');
+
+    tbody.querySelectorAll('[data-view-file]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const original = btn.textContent;
+        btn.textContent = 'Opening…';
+        const { data, error } = await sb.storage.from('submission-files').createSignedUrl(btn.dataset.viewFile, 3600);
+        btn.textContent = original;
+        if (error) { alert(error.message); return; }
+        window.open(data.signedUrl, '_blank');
+      });
+    });
 
     tbody.querySelectorAll('[data-save-grade]').forEach(btn => {
       btn.addEventListener('click', async () => {
