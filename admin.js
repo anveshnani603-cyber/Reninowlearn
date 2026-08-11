@@ -78,8 +78,28 @@
       const target = item.dataset.page;
       document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === 'page-' + target));
       document.getElementById('topbarTitle').textContent = titles[target];
+      document.getElementById('sidebar').classList.remove('mobile-open');
+      document.getElementById('scrim').classList.remove('show');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     });
   });
+
+  // Mobile sidebar drawer
+  const sidebarEl = document.getElementById('sidebar');
+  const scrimEl = document.getElementById('scrim');
+  const hamburgerEl = document.getElementById('hamburger');
+  if (hamburgerEl) {
+    hamburgerEl.addEventListener('click', () => {
+      sidebarEl.classList.add('mobile-open');
+      scrimEl.classList.add('show');
+    });
+  }
+  if (scrimEl) {
+    scrimEl.addEventListener('click', () => {
+      sidebarEl.classList.remove('mobile-open');
+      scrimEl.classList.remove('show');
+    });
+  }
 
   // ------------------------------------------------------------
   // SHARED STATE
