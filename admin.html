@@ -15,906 +15,364 @@
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:var(--bg);color:var(--text);font-family:var(--body);line-height:1.5;}
+a{color:inherit;text-decoration:none;}
 button{font-family:inherit;cursor:pointer;}
-a{color:inherit;}
-::-webkit-scrollbar{width:10px;height:10px;}
-::-webkit-scrollbar-track{background:transparent;}
-::-webkit-scrollbar-thumb{background:var(--line);border-radius:20px;}
 :focus-visible{outline:2px solid var(--teal);outline-offset:2px;}
+::-webkit-scrollbar{width:10px;height:10px;} ::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--line);border-radius:20px;}
 
-/* ---------- AUTH GATE ---------- */
+/* ---- Auth gate ---- */
 .auth-gate{position:fixed;inset:0;background:var(--bg-deep);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px;}
 .auth-card{width:100%;max-width:400px;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:32px;}
 .auth-card h2{font-family:var(--display);font-size:22px;margin-bottom:6px;}
 .auth-card p{color:var(--muted);font-size:13.5px;margin-bottom:22px;}
-.field{margin-bottom:16px;}
-.field label{display:block;font-family:var(--mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:7px;}
-.field input,.field select,.field textarea{width:100%;padding:12px 14px;border-radius:9px;border:1px solid var(--line);background:var(--bg-deep);color:var(--text);font-size:14.5px;}
-.field textarea{resize:vertical;min-height:70px;}
-.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--teal);}
 .auth-error{color:var(--bad);font-size:12.5px;margin-bottom:12px;min-height:16px;}
-.btn{padding:11px 18px;border-radius:100px;font-weight:600;font-size:13.5px;border:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap;transition:transform .15s ease;}
-.btn-primary{background:linear-gradient(135deg,#FFDA9B,var(--teal));color:var(--on-gold);width:100%;}
-.btn-primary:hover{transform:translateY(-1px);}
+.auth-submit{width:100%;justify-content:center;margin-top:6px;}
+.app{display:none;}
+.app.ready{display:flex;}
+
+/* ---- Shell ---- */
+.app{min-height:100vh;}
+.sidebar{width:230px;flex-shrink:0;background:var(--bg-deep);border-right:1px solid var(--line);
+  display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;padding:18px 14px;}
+.brand{display:flex;flex-direction:column;line-height:1.05;margin-bottom:6px;}
+.brand b{font-family:var(--display);font-weight:700;font-size:16px;color:var(--teal);}
+.brand span{font-family:var(--mono);font-size:8px;letter-spacing:1.4px;color:var(--muted);text-transform:uppercase;margin-top:2px;}
+.role-pill{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;letter-spacing:1px;
+  color:var(--muted);border:1px solid var(--line);border-radius:100px;padding:5px 12px;margin:14px 0 10px;text-transform:uppercase;width:fit-content;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;color:var(--muted);
+  font-size:14px;font-weight:500;border:none;background:transparent;width:100%;text-align:left;margin-bottom:2px;}
+.nav-item:hover{background:var(--surface);color:var(--text);}
+.nav-item.active{background:linear-gradient(135deg, rgba(255,203,116,.16), rgba(255,203,116,.05));
+  color:var(--teal);box-shadow:inset 0 0 0 1px rgba(255,203,116,.25);font-weight:600;}
+.sidebar-bottom{margin-top:auto;padding-top:14px;border-top:1px solid var(--line);}
+.side-link{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;color:var(--muted);font-size:13.5px;font-weight:500;border:none;background:transparent;width:100%;text-align:left;}
+.side-link:hover{background:rgba(230,138,122,.12);color:var(--bad);}
+
+.main{flex:1;min-width:0;}
+.topbar{height:60px;border-bottom:1px solid var(--line);background:var(--bg-deep);display:flex;align-items:center;
+  justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:5;}
+.topbar-title{font-family:var(--display);font-weight:600;font-size:16px;}
+.content{padding:28px 32px 60px;}
+@media (max-width:640px){.content{padding:20px 16px 48px;} .sidebar{width:180px;}}
+
+.page{display:none;} .page.active{display:block;}
+.page-head{margin-bottom:22px;}
+.page-head h1{font-family:var(--display);font-weight:700;font-size:24px;}
+.page-head p{color:var(--muted);font-size:13.5px;margin-top:4px;}
+
+.grid{display:grid;gap:16px;} .grid-4{grid-template-columns:repeat(4,1fr);}
+@media (max-width:900px){.grid-4{grid-template-columns:repeat(2,1fr);}}
+@media (max-width:500px){.grid-4{grid-template-columns:1fr;}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;}
+.stat-num{font-family:var(--mono);font-size:24px;font-weight:500;}
+.stat-label{font-size:12.5px;color:var(--muted);margin-top:4px;}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:20px;}
+.panel-title{font-family:var(--display);font-weight:600;font-size:15px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+.form-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+@media (max-width:760px){.form-grid{grid-template-columns:1fr 1fr;}}
+@media (max-width:520px){.form-grid{grid-template-columns:1fr;}}
+.field{display:flex;flex-direction:column;gap:6px;}
+.field.span2{grid-column:span 2;}
+.field.span3{grid-column:1 / -1;}
+.field label{font-family:var(--mono);font-size:10.5px;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);}
+.field input,.field select,.field textarea{width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--line);
+  background:var(--bg-deep);color:var(--text);font-size:13.5px;font-family:inherit;}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--teal);}
+.field-check{flex-direction:row;align-items:center;gap:8px;}
+.field-check input{width:auto;}
+.form-actions{display:flex;gap:10px;margin-top:14px;}
+
+.btn{padding:9px 16px;border-radius:100px;font-weight:600;font-size:13px;border:none;display:inline-flex;
+  align-items:center;gap:6px;white-space:nowrap;}
+.btn-primary{background:linear-gradient(135deg,#FFDA9B,var(--teal));color:var(--on-gold);}
 .btn-outline{background:transparent;border:1px solid var(--line);color:var(--text);}
 .btn-outline:hover{border-color:var(--teal);color:var(--teal);}
-.btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
-.btn-sm{padding:8px 14px;font-size:12.5px;}
-.deny-card{max-width:420px;text-align:center;}
+.btn-danger{background:transparent;border:1px solid rgba(230,138,122,.4);color:var(--bad);}
+.btn-sm{padding:6px 12px;font-size:12px;}
 
-/* ---------- APP SHELL ---------- */
-.app{display:none;min-height:100vh;}
-.app.ready{display:block;}
-.topbar{height:64px;border-bottom:1px solid var(--line);background:var(--bg-deep);display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:30;gap:16px;flex-wrap:wrap;}
-.brand{display:flex;align-items:center;gap:10px;}
-.brand-mark{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#FFE3B0,var(--teal) 55%,#C98A2E);flex-shrink:0;}
-.brand-mark svg{width:18px;height:18px;}
-.brand b{font-family:var(--display);font-weight:700;font-size:15px;}
-.brand span{display:block;font-family:var(--mono);font-size:9px;letter-spacing:1.3px;color:var(--muted);text-transform:uppercase;}
-.topbar-right{display:flex;align-items:center;gap:10px;}
-.pill{font-family:var(--mono);font-size:10.5px;letter-spacing:1px;color:var(--muted);border:1px solid var(--line);border-radius:100px;padding:5px 12px;text-transform:uppercase;}
-.pill-ok{background:rgba(143,201,138,.15);color:var(--good);border-color:transparent;}
-.pill-bad{background:rgba(230,138,122,.15);color:var(--bad);border-color:transparent;}
-.pill-role{background:var(--surface-2);color:var(--muted);border-color:transparent;}
-.content{padding:28px 24px 60px;max-width:1100px;margin:0 auto;}
-.page-head{margin-bottom:18px;}
-.page-head h1{font-family:var(--display);font-weight:700;font-size:24px;letter-spacing:-.4px;}
-.page-head p{color:var(--muted);font-size:14px;margin-top:5px;}
-
-/* ---------- TABS ---------- */
-.tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
-.tab-btn{background:var(--surface);border:1px solid var(--line);color:var(--muted);padding:8px 16px;border-radius:999px;font-size:13px;font-weight:600;}
-.tab-btn.active{background:var(--teal);color:var(--on-gold);border-color:var(--teal);}
-.panel{display:none;} .panel.active{display:block;}
-
-.grid-2{display:grid;grid-template-columns:1.1fr 1fr;gap:20px;}
-@media (max-width:820px){.grid-2{grid-template-columns:1fr;}}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px;margin-bottom:20px;}
-.card-title{font-family:var(--display);font-weight:600;font-size:15.5px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
-.card h3{font-family:var(--display);font-size:15px;margin-bottom:14px;}
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-.form-grid .full{grid-column:1/-1;}
-.msg{font-size:13px;margin-bottom:10px;min-height:16px;}
-.msg.bad{color:var(--bad);} .msg.good{color:var(--good);}
-
-table{width:100%;border-collapse:collapse;font-size:13px;}
-th{text-align:left;color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.4px;padding:8px 10px;border-bottom:1px solid var(--line);}
-td{padding:10px;border-bottom:1px solid var(--line);vertical-align:middle;}
-tr:last-child td{border-bottom:none;}
-.row-actions{display:flex;gap:6px;flex-wrap:wrap;}
+table{width:100%;border-collapse:collapse;}
+th{font-family:var(--mono);font-size:10.5px;letter-spacing:.8px;text-transform:uppercase;color:var(--muted-2);text-align:left;padding:0 14px 10px;}
+td{padding:12px 14px;border-top:1px solid var(--line);font-size:13.5px;vertical-align:middle;}
+tr:first-child td{border-top:none;}
 .table-wrap{overflow-x:auto;}
-
-/* ---------- SCANNER ---------- */
-.scan-frame{position:relative;width:100%;aspect-ratio:1/1;background:#000;border-radius:14px;overflow:hidden;margin-bottom:16px;}
-.scan-frame video{width:100%;height:100%;object-fit:cover;}
-.scan-frame.idle::after{content:"Camera off";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--muted-2);font-size:13px;background:var(--bg-deep);}
-.scan-frame.idle video{display:none;}
-.scan-reticle{position:absolute;inset:14%;border:2px solid rgba(255,203,116,.55);border-radius:14px;pointer-events:none;box-shadow:0 0 0 999px rgba(0,0,0,.28);}
-.scan-frame.idle .scan-reticle{display:none;}
-.scan-controls{display:flex;gap:10px;}
-.scan-controls .btn{flex:1;}
-.scan-status{margin-top:12px;font-size:12.5px;color:var(--muted);min-height:16px;}
-.scan-status.ok{color:var(--good);}
-.scan-status.err{color:var(--bad);}
-
-.field-row{display:flex;gap:10px;}
-.field-row .field{flex:1;margin-bottom:0;}
-.manual-hint{font-size:12px;color:var(--muted-2);margin-top:8px;}
-
-.log-list{display:flex;flex-direction:column;gap:2px;max-height:520px;overflow-y:auto;}
-.log-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 4px;border-top:1px solid var(--line);}
-.log-row:first-child{border-top:none;}
-.log-main{display:flex;align-items:center;gap:12px;min-width:0;}
-.log-avatar{width:34px;height:34px;border-radius:50%;background:var(--surface-2);display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:700;font-size:12px;color:var(--muted);flex-shrink:0;}
-.log-name{font-size:13.5px;font-weight:600;}
-.log-time{font-size:11.5px;color:var(--muted-2);margin-top:1px;}
-.log-badge{font-family:var(--mono);font-size:10.5px;letter-spacing:.4px;padding:4px 10px;border-radius:100px;white-space:nowrap;flex-shrink:0;}
-.log-badge.ok{background:rgba(143,201,138,.14);color:var(--good);border:1px solid rgba(143,201,138,.3);}
-.log-badge.dup{background:rgba(154,194,224,.14);color:var(--info);border:1px solid rgba(154,194,224,.3);}
-.log-badge.err{background:rgba(230,138,122,.14);color:var(--bad);border:1px solid rgba(230,138,122,.3);}
-.empty-note{color:var(--muted-2);font-size:13px;padding:20px 4px;text-align:center;}
-
-.search-results{margin-top:10px;display:flex;flex-direction:column;gap:6px;max-height:220px;overflow-y:auto;}
-.search-hit{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 10px;border:1px solid var(--line);border-radius:9px;font-size:13px;}
-.search-hit button{flex-shrink:0;}
-
-/* ---------- QR MODAL ---------- */
-.qr-modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:100;padding:20px;}
-.qr-modal.show{display:flex;}
-.qr-modal .box{background:var(--surface);border-radius:14px;padding:24px;text-align:center;max-width:340px;}
-.qr-modal img{width:220px;height:220px;background:#fff;border-radius:8px;margin-bottom:12px;}
-.qr-modal p{color:var(--muted);font-size:12px;margin-bottom:14px;word-break:break-all;}
+.muted{color:var(--muted);font-size:13px;}
+.pill{font-family:var(--mono);font-size:10.5px;padding:4px 10px;border-radius:100px;white-space:nowrap;}
+.pill-pending{background:rgba(255,180,84,.12);color:#FFB454;}
+.pill-submitted{background:rgba(154,194,224,.12);color:var(--info);}
+.pill-graded{background:rgba(143,201,138,.12);color:var(--good);}
+.pill-role-admin{background:rgba(230,138,122,.14);color:var(--bad);}
+.pill-role-instructor{background:rgba(154,194,224,.14);color:var(--info);}
+.pill-role-student{background:var(--surface-2);color:var(--muted);}
+.msg{font-size:12.5px;margin-top:8px;min-height:16px;}
+.msg.ok{color:var(--good);} .msg.err{color:var(--bad);}
+.score-input{width:70px;}
 </style>
 </head>
 <body>
 
-<!-- ================= AUTH GATE ================= -->
 <div class="auth-gate" id="authGate">
   <div class="auth-card">
-    <h2>Admin Console</h2>
-    <p>Sign in with your RENI admin or instructor account.</p>
+    <h2>RENI Admin</h2>
+    <p>Staff sign-in — instructors and admins only.</p>
     <div class="auth-error" id="authError"></div>
     <form id="loginForm">
-      <div class="field"><label>Email</label><input type="email" id="loginEmail" required></div>
-      <div class="field"><label>Password</label><input type="password" id="loginPassword" required></div>
-      <button type="submit" class="btn btn-primary" id="loginBtn">Log in</button>
+      <div class="field" style="margin-bottom:14px;"><label>Email</label><input type="email" id="loginEmail" required></div>
+      <div class="field" style="margin-bottom:14px;"><label>Password</label><input type="password" id="loginPassword" required></div>
+      <button type="submit" class="btn btn-primary auth-submit">Log in</button>
     </form>
+    <p class="muted" style="margin-top:16px;">Not a staff account? <a href="index.html" style="color:var(--teal);">Go to the student dashboard →</a></p>
   </div>
 </div>
 
-<!-- ================= NOT AUTHORIZED ================= -->
-<div class="auth-gate" id="denyGate" style="display:none;">
-  <div class="auth-card deny-card">
-    <h2>Not authorized</h2>
-    <p>This account doesn't have admin or instructor access. Signed in as <span id="denyEmail" style="color:var(--text);"></span>.</p>
-    <button class="btn btn-outline" id="denyLogoutBtn" style="width:100%;">Sign out</button>
-  </div>
-</div>
-
-<!-- ================= APP ================= -->
-<div class="app" id="appRoot">
-  <header class="topbar">
-    <a href="index.html" class="brand" style="display:flex;">
-      <span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="#232120" stroke-width="2"><path d="M12 3L2 8l10 5 10-5-10-5z"/><path d="M6 10.5V16c0 1.5 2.7 3 6 3s6-1.5 6-3v-5.5"/></svg></span>
-      <span><b>RENI</b><span>Admin Console</span></span>
-    </a>
-    <div class="topbar-right">
-      <span class="pill" id="whoBadge">—</span>
-      <a href="index.html" class="btn btn-outline btn-sm">Student view</a>
-      <button class="btn btn-outline btn-sm" id="logoutBtn">Logout</button>
+<div class="app" id="appRoot" style="display:flex;">
+  <aside class="sidebar">
+    <div class="brand"><b>RENI</b><span>Admin Console</span></div>
+    <span class="role-pill" id="rolePill">—</span>
+    <button class="nav-item active" data-page="overview">Overview</button>
+    <button class="nav-item" data-page="students">Students</button>
+    <button class="nav-item" data-page="roadmaps">Roadmaps</button>
+    <button class="nav-item" data-page="assignments">Assignments</button>
+    <button class="nav-item" data-page="assessments">Assessments</button>
+    <button class="nav-item" data-page="sessions">Sessions</button>
+    <button class="nav-item" data-page="content">Content</button>
+    <button class="nav-item" data-page="letters">Recognition Letters</button>
+    <div class="sidebar-bottom">
+      <a href="index.html" class="side-link">← Student dashboard</a>
+      <button class="side-link" id="logoutBtn">Log out</button>
     </div>
-  </header>
+  </aside>
 
-  <main class="content">
-    <div class="page-head">
-      <h1>Admin Console</h1>
-      <p>Manage students, assignments, classes, recognition letters, and live attendance in one place.</p>
-    </div>
+  <div class="main">
+    <header class="topbar"><span class="topbar-title" id="topbarTitle">Overview</span></header>
+    <main class="content">
 
-    <div class="tabs">
-      <button class="tab-btn active" data-tab="students">Students</button>
-      <button class="tab-btn" data-tab="assignments">Assignments</button>
-      <button class="tab-btn" data-tab="sessions">Classes</button>
-      <button class="tab-btn" data-tab="letters">Recognition letters</button>
-      <button class="tab-btn" data-tab="attendance">Attendance · QR</button>
-    </div>
-
-    <!-- STUDENTS -->
-    <div class="panel active" id="panel-students">
-      <div class="card">
-        <h3>All students</h3>
-        <div class="msg" id="studentsMsg"></div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Status</th><th>Member since</th><th>Actions</th></tr></thead>
-            <tbody id="studentsBody"><tr><td colspan="7">Loading…</td></tr></tbody>
-          </table>
+      <!-- OVERVIEW -->
+      <section class="page active" id="page-overview">
+        <div class="page-head"><h1>Overview</h1><p>A quick read on where things stand.</p></div>
+        <div class="grid grid-4" id="overviewStats">
+          <div class="card"><div class="stat-num">—</div><div class="stat-label">Students</div></div>
+          <div class="card"><div class="stat-num">—</div><div class="stat-label">Pending grading</div></div>
+          <div class="card"><div class="stat-num">—</div><div class="stat-label">Upcoming sessions</div></div>
+          <div class="card"><div class="stat-num">—</div><div class="stat-label">Published roadmaps</div></div>
         </div>
-      </div>
-    </div>
+      </section>
 
-    <!-- ASSIGNMENTS -->
-    <div class="panel" id="panel-assignments">
-      <div class="card">
-        <h3>Post a new assignment</h3>
-        <div class="msg" id="assignmentMsg"></div>
-        <form id="assignmentForm">
-          <div class="form-grid">
-            <div class="field full"><label>Title</label><input type="text" id="asgTitle" required></div>
-            <div class="field full"><label>Description</label><textarea id="asgDesc"></textarea></div>
-            <div class="field"><label>Roadmap</label><select id="asgRoadmap"><option value="">— none —</option></select></div>
-            <div class="field"><label>Max score</label><input type="number" id="asgMaxScore" value="100"></div>
-            <div class="field"><label>Due date</label><input type="datetime-local" id="asgDue"></div>
-            <div class="field"><label>Published</label><select id="asgPublished"><option value="true">Yes</option><option value="false">No (draft)</option></select></div>
-          </div>
-          <button class="btn btn-primary" type="submit" style="margin-top:6px;width:auto;">Post assignment</button>
-        </form>
-      </div>
-      <div class="card">
-        <h3>All assignments</h3>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Title</th><th>Roadmap</th><th>Due</th><th>Max score</th><th>Published</th></tr></thead>
-            <tbody id="assignmentsBody"><tr><td colspan="5">Loading…</td></tr></tbody>
-          </table>
+      <!-- STUDENTS -->
+      <section class="page" id="page-students">
+        <div class="page-head"><h1>Students</h1><p>Everyone with a profile — manage staff roles here.</p></div>
+        <div class="panel">
+          <div class="table-wrap"><table>
+            <thead><tr><th>Name</th><th>Phone</th><th>Role</th><th>Member since</th><th>XP</th><th></th></tr></thead>
+            <tbody id="studentsTable"><tr><td colspan="6" class="muted">Loading…</td></tr></tbody>
+          </table></div>
         </div>
-      </div>
-    </div>
+      </section>
 
-    <!-- SESSIONS / CLASSES -->
-    <div class="panel" id="panel-sessions">
-      <div class="card">
-        <h3>Schedule a live class</h3>
-        <div class="msg" id="sessionMsg"></div>
-        <form id="sessionForm">
-          <div class="form-grid">
-            <div class="field full"><label>Title</label><input type="text" id="sesTitle" required></div>
-            <div class="field"><label>Instructor name</label><input type="text" id="sesInstructor"></div>
-            <div class="field"><label>Roadmap</label><select id="sesRoadmap"><option value="">— none —</option></select></div>
-            <div class="field"><label>Starts at</label><input type="datetime-local" id="sesStarts" required></div>
-            <div class="field"><label>Ends at</label><input type="datetime-local" id="sesEnds"></div>
-            <div class="field full"><label>Meeting link (Zoom/Meet/etc.)</label><input type="url" id="sesUrl" placeholder="https://..."></div>
-          </div>
-          <button class="btn btn-primary" type="submit" style="margin-top:6px;width:auto;">Schedule class</button>
-        </form>
-      </div>
-      <div class="card">
-        <h3>All classes</h3>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Title</th><th>Roadmap</th><th>Instructor</th><th>Starts</th><th>Link</th></tr></thead>
-            <tbody id="sessionsBody"><tr><td colspan="5">Loading…</td></tr></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- RECOGNITION LETTERS -->
-    <div class="panel" id="panel-letters">
-      <div class="card">
-        <h3>Issue a recognition letter</h3>
-        <div class="msg" id="letterMsg"></div>
-        <form id="letterForm">
-          <div class="form-grid">
-            <div class="field full"><label>Student</label><select id="letStudent" required><option value="">Select a student…</option></select></div>
-            <div class="field"><label>Roadmap / course</label><select id="letRoadmap"><option value="">— none —</option></select></div>
-            <div class="field"><label>Duration</label><input type="text" id="letDuration" placeholder="e.g. 8 weeks"></div>
-            <div class="field"><label>Completed on</label><input type="date" id="letCompleted"></div>
-            <div class="field"><label>Director name</label><input type="text" id="letDirector" placeholder="R. Sharma"></div>
-          </div>
-          <button class="btn btn-primary" type="submit" style="margin-top:6px;width:auto;">Issue letter</button>
-        </form>
-      </div>
-      <div class="card">
-        <h3>Issued letters</h3>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Student</th><th>Course</th><th>Code</th><th>Issued</th><th>QR</th></tr></thead>
-            <tbody id="lettersBody"><tr><td colspan="5">Loading…</td></tr></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- ATTENDANCE / QR SCAN -->
-    <div class="panel" id="panel-attendance">
-      <div class="grid-2">
-        <!-- SCANNER CARD -->
-        <div class="card">
-          <div class="card-title">
-            <span>Scan</span>
-            <select id="sessionSelect" style="max-width:220px;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg-deep);color:var(--text);font-size:12.5px;">
-              <option value="">Loading sessions…</option>
-            </select>
-          </div>
-
-          <div class="scan-frame idle" id="scanFrame">
-            <video id="scanVideo" playsinline muted></video>
-            <div class="scan-reticle"></div>
-          </div>
-          <canvas id="scanCanvas" style="display:none;"></canvas>
-
-          <div class="scan-controls">
-            <button class="btn btn-primary" id="startScanBtn">Start camera</button>
-            <button class="btn btn-outline" id="stopScanBtn" style="display:none;">Stop camera</button>
-          </div>
-          <p class="scan-status" id="scanStatus">Choose a session, then start the camera.</p>
-
-          <div style="border-top:1px solid var(--line);margin:20px 0 16px;"></div>
-
-          <p class="card-title" style="margin-bottom:10px;">Manual check-in</p>
-          <div class="field-row">
-            <div class="field">
-              <input type="text" id="manualInput" placeholder="Student name, phone, or QR ID">
+      <!-- ROADMAPS -->
+      <section class="page" id="page-roadmaps">
+        <div class="page-head"><h1>Roadmaps</h1><p>The learning-path catalog students enroll into.</p></div>
+        <div class="panel">
+          <div class="panel-title">Add / edit roadmap</div>
+          <form id="roadmapForm">
+            <input type="hidden" id="rm_id">
+            <div class="form-grid">
+              <div class="field"><label>Slug</label><input id="rm_slug" required></div>
+              <div class="field"><label>Title</label><input id="rm_title" required></div>
+              <div class="field"><label>Track label</label><input id="rm_track"></div>
+              <div class="field"><label>Icon</label><input id="rm_icon" placeholder="route"></div>
+              <div class="field"><label>Total modules</label><input id="rm_modules" type="number" min="0" value="0"></div>
+              <div class="field field-check"><input type="checkbox" id="rm_published" checked><label style="text-transform:none;font-size:13px;">Published</label></div>
+              <div class="field span3"><label>Description</label><textarea id="rm_desc" rows="2"></textarea></div>
             </div>
-            <button class="btn btn-outline" id="manualSearchBtn">Search</button>
-          </div>
-          <p class="manual-hint">Use this if a QR won't scan — search by name/phone or paste the ID directly.</p>
-          <div class="search-results" id="searchResults"></div>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">Save roadmap</button>
+              <button type="button" class="btn btn-outline" id="rm_cancel">Clear</button>
+            </div>
+            <p class="msg" id="rm_msg"></p>
+          </form>
         </div>
-
-        <!-- LOG CARD -->
-        <div class="card">
-          <div class="card-title">
-            <span>Checked in today</span>
-            <button class="btn btn-outline btn-sm" id="refreshLogBtn">Refresh</button>
-          </div>
-          <div class="log-list" id="logList">
-            <p class="empty-note">Select a session to see check-ins.</p>
-          </div>
+        <div class="panel">
+          <div class="panel-title">All roadmaps</div>
+          <div class="table-wrap"><table>
+            <thead><tr><th>Title</th><th>Slug</th><th>Modules</th><th>Status</th><th></th></tr></thead>
+            <tbody id="roadmapsTable"><tr><td colspan="5" class="muted">Loading…</td></tr></tbody>
+          </table></div>
         </div>
-      </div>
-    </div>
-  </main>
-</div>
+      </section>
 
-<div class="qr-modal" id="qrModal">
-  <div class="box">
-    <img id="qrModalImg" src="" alt="QR code">
-    <p id="qrModalLabel"></p>
-    <button class="btn btn-outline btn-sm" onclick="document.getElementById('qrModal').classList.remove('show')">Close</button>
+      <!-- ASSIGNMENTS -->
+      <section class="page" id="page-assignments">
+        <div class="page-head"><h1>Assignments</h1><p>Create assignments and grade what students submit.</p></div>
+        <div class="panel">
+          <div class="panel-title">Add / edit assignment</div>
+          <form id="assignForm">
+            <input type="hidden" id="as_id">
+            <div class="form-grid">
+              <div class="field span2"><label>Title</label><input id="as_title" required></div>
+              <div class="field"><label>Roadmap</label><select id="as_roadmap"></select></div>
+              <div class="field"><label>Due date</label><input id="as_due" type="datetime-local"></div>
+              <div class="field"><label>Max score</label><input id="as_max" type="number" value="100"></div>
+              <div class="field field-check"><input type="checkbox" id="as_published" checked><label style="text-transform:none;font-size:13px;">Published</label></div>
+              <div class="field span3"><label>Description</label><textarea id="as_desc" rows="2"></textarea></div>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">Save assignment</button>
+              <button type="button" class="btn btn-outline" id="as_cancel">Clear</button>
+            </div>
+            <p class="msg" id="as_msg"></p>
+          </form>
+        </div>
+        <div class="panel">
+          <div class="panel-title">All assignments</div>
+          <div class="table-wrap"><table>
+            <thead><tr><th>Title</th><th>Roadmap</th><th>Due</th><th>Status</th><th></th></tr></thead>
+            <tbody id="assignmentsTable"><tr><td colspan="5" class="muted">Loading…</td></tr></tbody>
+          </table></div>
+        </div>
+        <div class="panel">
+          <div class="panel-title">
+            <span>Grade submissions</span>
+            <select id="gradeAssignmentPicker" style="width:auto;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg-deep);color:var(--text);"></select>
+          </div>
+          <div class="table-wrap"><table>
+            <thead><tr><th>Student</th><th>Status</th><th>Submitted</th><th>Score</th><th>Feedback</th><th>Award XP</th><th></th></tr></thead>
+            <tbody id="submissionsTable"><tr><td colspan="7" class="muted">Pick an assignment above.</td></tr></tbody>
+          </table></div>
+        </div>
+      </section>
+
+      <!-- ASSESSMENTS -->
+      <section class="page" id="page-assessments">
+        <div class="page-head"><h1>Assessments</h1><p>Quizzes and tests, plus recording student results.</p></div>
+        <div class="panel">
+          <div class="panel-title">Add / edit assessment</div>
+          <form id="assessForm">
+            <input type="hidden" id="ax_id">
+            <div class="form-grid">
+              <div class="field span2"><label>Title</label><input id="ax_title" required></div>
+              <div class="field"><label>Roadmap</label><select id="ax_roadmap"></select></div>
+              <div class="field"><label>Total marks</label><input id="ax_marks" type="number" value="100"></div>
+              <div class="field"><label>Scheduled at</label><input id="ax_sched" type="datetime-local"></div>
+              <div class="field field-check"><input type="checkbox" id="ax_published" checked><label style="text-transform:none;font-size:13px;">Published</label></div>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">Save assessment</button>
+              <button type="button" class="btn btn-outline" id="ax_cancel">Clear</button>
+            </div>
+            <p class="msg" id="ax_msg"></p>
+          </form>
+        </div>
+        <div class="panel">
+          <div class="panel-title">All assessments</div>
+          <div class="table-wrap"><table>
+            <thead><tr><th>Title</th><th>Roadmap</th><th>Scheduled</th><th>Status</th><th></th></tr></thead>
+            <tbody id="assessmentsTable"><tr><td colspan="5" class="muted">Loading…</td></tr></tbody>
+          </table></div>
+        </div>
+        <div class="panel">
+          <div class="panel-title">
+            <span>Record a result</span>
+            <select id="resultAssessmentPicker" style="width:auto;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg-deep);color:var(--text);"></select>
+          </div>
+          <div class="form-grid" style="align-items:end;">
+            <div class="field span2"><label>Student</label><select id="result_student"></select></div>
+            <div class="field"><label>Score</label><input id="result_score" type="number"></div>
+          </div>
+          <div class="form-actions"><button class="btn btn-primary btn-sm" id="saveResultBtn">Save result</button></div>
+          <p class="msg" id="result_msg"></p>
+        </div>
+      </section>
+
+      <!-- SESSIONS -->
+      <section class="page" id="page-sessions">
+        <div class="page-head"><h1>Live Sessions</h1><p>Schedule classes and drop in recordings afterward.</p></div>
+        <div class="panel">
+          <div class="panel-title">Add / edit session</div>
+          <form id="sessForm">
+            <input type="hidden" id="sess_id">
+            <div class="form-grid">
+              <div class="field span2"><label>Title</label><input id="sess_title" required></div>
+              <div class="field"><label>Roadmap</label><select id="sess_roadmap"></select></div>
+              <div class="field"><label>Instructor name</label><input id="sess_instructor"></div>
+              <div class="field"><label>Starts at</label><input id="sess_starts" type="datetime-local" required></div>
+              <div class="field"><label>Ends at</label><input id="sess_ends" type="datetime-local"></div>
+              <div class="field span2"><label>Meeting URL</label><input id="sess_meeting" type="url"></div>
+              <div class="field span2"><label>Recording URL</label><input id="sess_recording" type="url"></div>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">Save session</button>
+              <button type="button" class="btn btn-outline" id="sess_cancel">Clear</button>
+            </div>
+            <p class="msg" id="sess_msg"></p>
+          </form>
+        </div>
+        <div class="panel">
+          <div class="panel-title">All sessions</div>
+          <div class="table-wrap"><table>
+            <thead><tr><th>Title</th><th>Instructor</th><th>Starts</th><th></th></tr></thead>
+            <tbody id="sessionsTable"><tr><td colspan="4" class="muted">Loading…</td></tr></tbody>
+          </table></div>
+        </div>
+      </section>
+
+      <!-- CONTENT -->
+      <section class="page" id="page-content">
+        <div class="page-head"><h1>Content Library</h1><p>Recordings, notes, and practice material.</p></div>
+        <div class="panel">
+          <div class="panel-title">Add / edit content</div>
+          <form id="contentForm">
+            <input type="hidden" id="ct_id">
+            <div class="form-grid">
+              <div class="field span2"><label>Title</label><input id="ct_title" required></div>
+              <div class="field"><label>Type</label><select id="ct_type"><option value="video">Video</option><option value="pdf">PDF</option><option value="doc">Doc</option></select></div>
+              <div class="field"><label>Roadmap</label><select id="ct_roadmap"></select></div>
+              <div class="field"><label>Duration (min)</label><input id="ct_duration" type="number"></div>
+              <div class="field"><label>Page count</label><input id="ct_pages" type="number"></div>
+              <div class="field span2"><label>URL</label><input id="ct_url" type="url"></div>
+              <div class="field field-check"><input type="checkbox" id="ct_published" checked><label style="text-transform:none;font-size:13px;">Published</label></div>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">Save content</button>
+              <button type="button" class="btn btn-outline" id="ct_cancel">Clear</button>
+            </div>
+            <p class="msg" id="ct_msg"></p>
+          </form>
+        </div>
+        <div class="panel">
+          <div class="panel-title">All content</div>
+          <div class="table-wrap"><table>
+            <thead><tr><th>Title</th><th>Type</th><th>Roadmap</th><th>Status</th><th></th></tr></thead>
+            <tbody id="contentTable"><tr><td colspan="5" class="muted">Loading…</td></tr></tbody>
+          </table></div>
+        </div>
+      </section>
+
+      <!-- RECOGNITION LETTERS -->
+      <section class="page" id="page-letters">
+        <div class="page-head"><h1>Recognition Letters</h1><p>Issue a completion letter for a student.</p></div>
+        <div class="panel">
+          <form id="letterForm">
+            <div class="form-grid">
+              <div class="field span2"><label>Student</label><select id="lt_student"></select></div>
+              <div class="field"><label>Roadmap</label><select id="lt_roadmap"></select></div>
+              <div class="field"><label>Duration label</label><input id="lt_duration" placeholder="e.g. 8 weeks"></div>
+              <div class="field"><label>Completed on</label><input id="lt_completed" type="date"></div>
+              <div class="field"><label>Director name</label><input id="lt_director" value="R. Sharma"></div>
+            </div>
+            <div class="form-actions"><button type="submit" class="btn btn-primary">Issue letter</button></div>
+            <p class="msg" id="lt_msg"></p>
+          </form>
+        </div>
+      </section>
+
+    </main>
   </div>
 </div>
 
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="config.js"></script>
-<script>
-const supabase = window.supabase.createClient(window.RENI_CONFIG.SUPABASE_URL, window.RENI_CONFIG.SUPABASE_ANON_KEY);
-
-const authGate = document.getElementById('authGate');
-const denyGate = document.getElementById('denyGate');
-const appRoot = document.getElementById('appRoot');
-const authError = document.getElementById('authError');
-
-let me = null;              // current admin/instructor profile row
-let roadmaps = [];          // cached roadmap list
-let sessions = [];          // cached session list (shared: Classes tab + Attendance tab)
-let students = [];          // cached student list (for the letters "student" dropdown)
-let currentSessionId = '';
-let stream = null;
-let scanning = false;
-let lastCode = '';
-let lastCodeAt = 0;
-const RESCAN_COOLDOWN_MS = 4000;
-const loadedPanels = new Set();
-
-/* ============================================================
-   AUTH
-   ============================================================ */
-init();
-
-async function init(){
-  const { data: { session } } = await supabase.auth.getSession();
-  if (session) await afterLogin();
-}
-
-document.getElementById('loginForm').addEventListener('submit', async (e)=>{
-  e.preventDefault();
-  authError.textContent = '';
-  const btn = document.getElementById('loginBtn');
-  btn.disabled = true; btn.textContent = 'Signing in…';
-  const email = document.getElementById('loginEmail').value.trim();
-  const password = document.getElementById('loginPassword').value;
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
-  btn.disabled = false; btn.textContent = 'Log in';
-  if (error) { authError.textContent = error.message; return; }
-  await afterLogin();
-});
-
-async function afterLogin(){
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return;
-
-  const { data: profile, error } = await supabase
-    .from('profiles')
-    .select('id, full_name, role')
-    .eq('id', user.id)
-    .single();
-
-  if (error || !profile || !['admin', 'instructor'].includes(profile.role)) {
-    authGate.style.display = 'none';
-    denyGate.style.display = 'flex';
-    document.getElementById('denyEmail').textContent = user.email || '';
-    return;
-  }
-
-  me = profile;
-  authGate.style.display = 'none';
-  denyGate.style.display = 'none';
-  appRoot.classList.add('ready');
-  document.getElementById('whoBadge').textContent = (profile.full_name || user.email) + ' · ' + profile.role;
-
-  await loadRoadmaps();
-  initTabs();
-  await loadPanel('students'); // default tab
-}
-
-document.getElementById('logoutBtn').addEventListener('click', doLogout);
-document.getElementById('denyLogoutBtn').addEventListener('click', doLogout);
-async function doLogout(){
-  stopScanner();
-  await supabase.auth.signOut();
-  location.reload();
-}
-
-/* ============================================================
-   TABS  (lazy-loads each panel's data the first time it's opened)
-   ============================================================ */
-function initTabs(){
-  document.querySelectorAll('.tab-btn').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-      document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-      btn.classList.add('active');
-      document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
-      loadPanel(btn.dataset.tab);
-      if (btn.dataset.tab !== 'attendance') stopScanner();
-    });
-  });
-}
-
-async function loadPanel(tab){
-  if (tab === 'students') return loadStudents();
-  if (tab === 'assignments') return loadedPanels.has('assignments') ? null : (loadedPanels.add('assignments'), Promise.all([loadRoadmapSelect('asgRoadmap'), loadAssignments()]));
-  if (tab === 'sessions') return loadSessions();
-  if (tab === 'letters') return loadedPanels.has('letters') ? null : (loadedPanels.add('letters'), Promise.all([loadRoadmapSelect('letRoadmap'), loadStudentSelect(), loadLetters()]));
-  if (tab === 'attendance') return loadSessions(); // also (re)fills sessionSelect
-}
-
-/* ============================================================
-   ROADMAPS  (shared lookup used by assignments / classes / letters)
-   ============================================================ */
-async function loadRoadmaps(){
-  const { data, error } = await supabase.from('roadmaps').select('id, title').order('title');
-  roadmaps = (!error && data) ? data : [];
-}
-function loadRoadmapSelect(selectId){
-  const sel = document.getElementById(selectId);
-  sel.innerHTML = '<option value="">— none —</option>' +
-    roadmaps.map(r => `<option value="${r.id}">${escapeHtml(r.title)}</option>`).join('');
-}
-function roadmapTitle(id){
-  const r = roadmaps.find(r => r.id === id);
-  return r ? r.title : '—';
-}
-
-/* ============================================================
-   STUDENTS TAB
-   ============================================================ */
-async function loadStudents(){
-  const body = document.getElementById('studentsBody');
-  const msg = document.getElementById('studentsMsg');
-  msg.textContent = '';
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('id, full_name, email, phone, role, status, created_at')
-    .order('created_at', { ascending: false });
-
-  if (error) { msg.textContent = 'Could not load students: ' + error.message; msg.className = 'msg bad'; body.innerHTML = ''; return; }
-
-  students = data || [];
-  if (!students.length) { body.innerHTML = '<tr><td colspan="7">No students yet.</td></tr>'; return; }
-
-  body.innerHTML = students.map(s => `
-    <tr>
-      <td>${escapeHtml(s.full_name || 'Unnamed')}</td>
-      <td>${escapeHtml(s.email || '—')}</td>
-      <td>${escapeHtml(s.phone || '—')}</td>
-      <td><span class="pill pill-role">${escapeHtml(s.role || 'student')}</span></td>
-      <td><span class="pill ${s.status === 'suspended' ? 'pill-bad' : 'pill-ok'}">${escapeHtml(s.status || 'active')}</span></td>
-      <td>${s.created_at ? new Date(s.created_at).toLocaleDateString() : '—'}</td>
-      <td class="row-actions">
-        <button class="btn btn-outline btn-sm" data-toggle-status="${s.id}">${s.status === 'suspended' ? 'Reactivate' : 'Suspend'}</button>
-      </td>
-    </tr>
-  `).join('');
-
-  body.querySelectorAll('[data-toggle-status]').forEach(btn=>{
-    btn.addEventListener('click', async ()=>{
-      const id = btn.dataset.toggleStatus;
-      const student = students.find(s => s.id === id);
-      const nextStatus = student.status === 'suspended' ? 'active' : 'suspended';
-      const { error } = await supabase.from('profiles').update({ status: nextStatus }).eq('id', id);
-      if (error) { msg.textContent = 'Update failed: ' + error.message; msg.className = 'msg bad'; return; }
-      await loadStudents();
-    });
-  });
-}
-
-/* ============================================================
-   ASSIGNMENTS TAB
-   ============================================================ */
-document.getElementById('assignmentForm').addEventListener('submit', async (e)=>{
-  e.preventDefault();
-  const msg = document.getElementById('assignmentMsg');
-  msg.textContent = '';
-  const payload = {
-    title: document.getElementById('asgTitle').value.trim(),
-    description: document.getElementById('asgDesc').value.trim() || null,
-    roadmap_id: document.getElementById('asgRoadmap').value || null,
-    max_score: Number(document.getElementById('asgMaxScore').value) || 100,
-    due_at: document.getElementById('asgDue').value ? new Date(document.getElementById('asgDue').value).toISOString() : null,
-    published: document.getElementById('asgPublished').value === 'true'
-  };
-  const { error } = await supabase.from('assignments').insert(payload);
-  if (error) { msg.textContent = 'Could not post assignment: ' + error.message; msg.className = 'msg bad'; return; }
-  msg.textContent = 'Assignment posted.'; msg.className = 'msg good';
-  e.target.reset();
-  document.getElementById('asgMaxScore').value = 100;
-  await loadAssignments();
-});
-
-async function loadAssignments(){
-  const body = document.getElementById('assignmentsBody');
-  const { data, error } = await supabase
-    .from('assignments')
-    .select('id, title, roadmap_id, due_at, max_score, published')
-    .order('due_at', { ascending: true });
-
-  if (error) { body.innerHTML = `<tr><td colspan="5">Could not load assignments: ${escapeHtml(error.message)}</td></tr>`; return; }
-  if (!data || !data.length) { body.innerHTML = '<tr><td colspan="5">No assignments yet.</td></tr>'; return; }
-
-  body.innerHTML = data.map(a => `
-    <tr>
-      <td>${escapeHtml(a.title)}</td>
-      <td>${escapeHtml(roadmapTitle(a.roadmap_id))}</td>
-      <td>${a.due_at ? new Date(a.due_at).toLocaleString() : '—'}</td>
-      <td>${a.max_score ?? '—'}</td>
-      <td><span class="pill ${a.published ? 'pill-ok' : 'pill-role'}">${a.published ? 'Published' : 'Draft'}</span></td>
-    </tr>
-  `).join('');
-}
-
-/* ============================================================
-   SESSIONS / CLASSES TAB  (also feeds the Attendance session picker)
-   ============================================================ */
-document.getElementById('sessionForm').addEventListener('submit', async (e)=>{
-  e.preventDefault();
-  const msg = document.getElementById('sessionMsg');
-  msg.textContent = '';
-  const payload = {
-    title: document.getElementById('sesTitle').value.trim(),
-    instructor_name: document.getElementById('sesInstructor').value.trim() || null,
-    roadmap_id: document.getElementById('sesRoadmap').value || null,
-    starts_at: new Date(document.getElementById('sesStarts').value).toISOString(),
-    ends_at: document.getElementById('sesEnds').value ? new Date(document.getElementById('sesEnds').value).toISOString() : null,
-    meeting_url: document.getElementById('sesUrl').value.trim() || null
-  };
-  const { error } = await supabase.from('live_sessions').insert(payload);
-  if (error) { msg.textContent = 'Could not schedule class: ' + error.message; msg.className = 'msg bad'; return; }
-  msg.textContent = 'Class scheduled.'; msg.className = 'msg good';
-  e.target.reset();
-  await loadSessions();
-});
-
-async function loadSessions(){
-  if (!roadmaps.length) await loadRoadmaps();
-  loadRoadmapSelect('sesRoadmap');
-
-  const body = document.getElementById('sessionsBody');
-  const { data, error } = await supabase
-    .from('live_sessions')
-    .select('id, title, instructor_name, roadmap_id, starts_at, meeting_url')
-    .order('starts_at', { ascending: false })
-    .limit(50);
-
-  if (error || !data) {
-    if (body) body.innerHTML = `<tr><td colspan="5">Could not load classes${error ? ': ' + escapeHtml(error.message) : ''}.</td></tr>`;
-    fillSessionSelect([]);
-    return;
-  }
-
-  sessions = data;
-
-  if (body) {
-    body.innerHTML = data.length ? data.map(s => `
-      <tr>
-        <td>${escapeHtml(s.title)}</td>
-        <td>${escapeHtml(roadmapTitle(s.roadmap_id))}</td>
-        <td>${escapeHtml(s.instructor_name || '—')}</td>
-        <td>${formatWhen(s.starts_at)}</td>
-        <td>${s.meeting_url ? `<a href="${escapeHtml(s.meeting_url)}" target="_blank" rel="noopener">Open</a>` : '—'}</td>
-      </tr>
-    `).join('') : '<tr><td colspan="5">No classes scheduled yet.</td></tr>';
-  }
-
-  fillSessionSelect(data);
-}
-
-function fillSessionSelect(data){
-  const sel = document.getElementById('sessionSelect');
-  if (!data.length) { sel.innerHTML = '<option value="">No sessions found</option>'; currentSessionId = ''; return; }
-  const prev = currentSessionId;
-  sel.innerHTML = data.map(s => `<option value="${s.id}">${escapeHtml(s.title)} — ${formatWhen(s.starts_at)}</option>`).join('');
-  currentSessionId = data.some(s => s.id === prev) ? prev : data[0].id;
-  sel.value = currentSessionId;
-  loadLog();
-}
-
-document.getElementById('sessionSelect').addEventListener('change', async (e)=>{
-  currentSessionId = e.target.value;
-  await loadLog();
-});
-document.getElementById('refreshLogBtn').addEventListener('click', loadLog);
-
-function formatWhen(iso){
-  if (!iso) return '—';
-  const d = new Date(iso);
-  return d.toLocaleDateString(undefined,{month:'short',day:'numeric'}) + ' · ' +
-         d.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'});
-}
-
-/* ============================================================
-   RECOGNITION LETTERS TAB
-   ============================================================ */
-async function loadStudentSelect(){
-  if (!students.length) {
-    const { data } = await supabase.from('profiles').select('id, full_name').order('full_name');
-    students = data || [];
-  }
-  const sel = document.getElementById('letStudent');
-  sel.innerHTML = '<option value="">Select a student…</option>' +
-    students.map(s => `<option value="${s.id}">${escapeHtml(s.full_name || 'Unnamed')}</option>`).join('');
-}
-
-document.getElementById('letterForm').addEventListener('submit', async (e)=>{
-  e.preventDefault();
-  const msg = document.getElementById('letterMsg');
-  msg.textContent = '';
-  const code = generateLetterCode();
-  const payload = {
-    student_id: document.getElementById('letStudent').value,
-    roadmap_id: document.getElementById('letRoadmap').value || null,
-    duration: document.getElementById('letDuration').value.trim() || null,
-    completed_on: document.getElementById('letCompleted').value || null,
-    director_name: document.getElementById('letDirector').value.trim() || null,
-    code
-  };
-  if (!payload.student_id) { msg.textContent = 'Choose a student.'; msg.className = 'msg bad'; return; }
-
-  const { error } = await supabase.from('recognition_letters').insert(payload);
-  if (error) { msg.textContent = 'Could not issue letter: ' + error.message; msg.className = 'msg bad'; return; }
-  msg.textContent = 'Letter issued.'; msg.className = 'msg good';
-  e.target.reset();
-  await loadLetters();
-});
-
-function generateLetterCode(){
-  return 'RENI-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
-}
-
-async function loadLetters(){
-  const body = document.getElementById('lettersBody');
-  const { data, error } = await supabase
-    .from('recognition_letters')
-    .select('id, code, roadmap_id, created_at, profiles(full_name)')
-    .order('created_at', { ascending: false })
-    .limit(100);
-
-  if (error) { body.innerHTML = `<tr><td colspan="5">Could not load letters: ${escapeHtml(error.message)}</td></tr>`; return; }
-  if (!data || !data.length) { body.innerHTML = '<tr><td colspan="5">No letters issued yet.</td></tr>'; return; }
-
-  body.innerHTML = data.map(l => `
-    <tr>
-      <td>${escapeHtml(l.profiles ? l.profiles.full_name : 'Student')}</td>
-      <td>${escapeHtml(roadmapTitle(l.roadmap_id))}</td>
-      <td>${escapeHtml(l.code)}</td>
-      <td>${l.created_at ? new Date(l.created_at).toLocaleDateString() : '—'}</td>
-      <td><button class="btn btn-outline btn-sm" data-qr="${escapeHtml(l.code)}" data-label="${escapeHtml(l.profiles ? l.profiles.full_name : '')}">View QR</button></td>
-    </tr>
-  `).join('');
-
-  body.querySelectorAll('[data-qr]').forEach(btn=>{
-    btn.addEventListener('click', ()=> showQr(btn.dataset.qr, btn.dataset.label));
-  });
-}
-
-function showQr(code, label){
-  const img = document.getElementById('qrModalImg');
-  img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=' + encodeURIComponent(code);
-  document.getElementById('qrModalLabel').textContent = (label ? label + ' — ' : '') + code;
-  document.getElementById('qrModal').classList.add('show');
-}
-
-/* ============================================================
-   ATTENDANCE TAB — camera scanning
-   ============================================================ */
-const scanFrame = document.getElementById('scanFrame');
-const video = document.getElementById('scanVideo');
-const canvas = document.getElementById('scanCanvas');
-const ctx = canvas.getContext('2d', { willReadFrequently: true });
-const scanStatus = document.getElementById('scanStatus');
-
-document.getElementById('startScanBtn').addEventListener('click', startScanner);
-document.getElementById('stopScanBtn').addEventListener('click', stopScanner);
-
-async function startScanner(){
-  if (!currentSessionId) { setStatus('Pick a session first.', 'err'); return; }
-  try {
-    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } } });
-  } catch (err) {
-    setStatus('Camera access denied or unavailable: ' + err.message, 'err');
-    return;
-  }
-  video.srcObject = stream;
-  await video.play();
-  scanFrame.classList.remove('idle');
-  document.getElementById('startScanBtn').style.display = 'none';
-  document.getElementById('stopScanBtn').style.display = 'inline-flex';
-  scanning = true;
-  setStatus('Point the camera at a student\'s RENI QR.');
-  requestAnimationFrame(scanLoop);
-}
-
-function stopScanner(){
-  scanning = false;
-  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
-  video.srcObject = null;
-  scanFrame.classList.add('idle');
-  document.getElementById('startScanBtn').style.display = 'inline-flex';
-  document.getElementById('stopScanBtn').style.display = 'none';
-}
-
-function scanLoop(){
-  if (!scanning) return;
-  if (video.readyState === video.HAVE_ENOUGH_DATA) {
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: 'dontInvert' });
-    if (code && code.data) handleDecoded(code.data);
-  }
-  requestAnimationFrame(scanLoop);
-}
-
-function handleDecoded(raw){
-  const now = Date.now();
-  if (raw === lastCode && (now - lastCodeAt) < RESCAN_COOLDOWN_MS) return; // debounce same code
-  lastCode = raw; lastCodeAt = now;
-  const studentId = extractStudentId(raw);
-  if (!studentId) { setStatus('QR read but not a recognizable RENI code.', 'err'); return; }
-  setStatus('Scanned — checking student…');
-  markAttendance(studentId);
-}
-
-// The student QR (generated on the student's "RENI QR" profile tab) may encode
-// either the raw student id, or a small JSON payload. Handles both.
-function extractStudentId(raw){
-  const text = raw.trim();
-  const uuidRe = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-  if (uuidRe.test(text)) return text;
-  try {
-    const obj = JSON.parse(text);
-    const candidate = obj.id || obj.studentId || obj.student_id || obj.uid;
-    if (candidate && uuidRe.test(candidate)) return candidate;
-  } catch (_) { /* not JSON, fall through */ }
-  const match = text.match(uuidRe);
-  return match ? match[0] : null;
-}
-
-function setStatus(msg, kind){
-  scanStatus.textContent = msg;
-  scanStatus.className = 'scan-status' + (kind ? ' ' + kind : '');
-}
-
-/* ---------- Mark attendance ---------- */
-async function markAttendance(studentId){
-  if (!currentSessionId) { setStatus('No session selected.', 'err'); return; }
-
-  const { data: profile, error: pErr } = await supabase
-    .from('profiles')
-    .select('id, full_name')
-    .eq('id', studentId)
-    .single();
-
-  if (pErr || !profile) {
-    setStatus('No student found for that code.', 'err');
-    addLogRow(null, 'err', 'Unknown ID');
-    return;
-  }
-
-  const { data: existing } = await supabase
-    .from('session_rsvps')
-    .select('status')
-    .eq('session_id', currentSessionId)
-    .eq('student_id', studentId)
-    .maybeSingle();
-
-  const alreadyAttended = existing && existing.status === 'attended';
-
-  const { error: upErr } = await supabase
-    .from('session_rsvps')
-    .upsert(
-      { session_id: currentSessionId, student_id: studentId, status: 'attended' },
-      { onConflict: 'session_id,student_id' }
-    );
-
-  if (upErr) {
-    setStatus('Could not save attendance: ' + upErr.message, 'err');
-    addLogRow(profile, 'err', upErr.message);
-    return;
-  }
-
-  if (alreadyAttended) {
-    setStatus(profile.full_name + ' was already marked present.', 'ok');
-    addLogRow(profile, 'dup');
-  } else {
-    setStatus(profile.full_name + ' marked present ✓', 'ok');
-    addLogRow(profile, 'ok');
-  }
-}
-
-/* ---------- Manual search fallback ---------- */
-document.getElementById('manualSearchBtn').addEventListener('click', runManualSearch);
-document.getElementById('manualInput').addEventListener('keydown', (e)=>{
-  if (e.key === 'Enter') { e.preventDefault(); runManualSearch(); }
-});
-
-async function runManualSearch(){
-  const q = document.getElementById('manualInput').value.trim();
-  const results = document.getElementById('searchResults');
-  results.innerHTML = '';
-  if (!q) return;
-
-  const uuidRe = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-  if (uuidRe.test(q)) {
-    markAttendance(q);
-    document.getElementById('manualInput').value = '';
-    return;
-  }
-
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('id, full_name, phone')
-    .or(`full_name.ilike.%${q}%,phone.ilike.%${q}%`)
-    .limit(8);
-
-  if (error || !data || !data.length) { results.innerHTML = '<p class="empty-note">No matches.</p>'; return; }
-
-  results.innerHTML = data.map(s => `
-    <div class="search-hit">
-      <span>${escapeHtml(s.full_name || 'Unnamed')} ${s.phone ? '· ' + escapeHtml(s.phone) : ''}</span>
-      <button class="btn btn-primary btn-sm" data-id="${s.id}">Mark present</button>
-    </div>
-  `).join('');
-  results.querySelectorAll('button[data-id]').forEach(btn=>{
-    btn.addEventListener('click', ()=> markAttendance(btn.dataset.id));
-  });
-}
-
-/* ---------- Attendance log list ---------- */
-async function loadLog(){
-  const list = document.getElementById('logList');
-  if (!currentSessionId) { list.innerHTML = '<p class="empty-note">Select a session to see check-ins.</p>'; return; }
-  list.innerHTML = '<p class="empty-note">Loading…</p>';
-
-  const { data, error } = await supabase
-    .from('session_rsvps')
-    .select('student_id, status, created_at, profiles(full_name)')
-    .eq('session_id', currentSessionId)
-    .eq('status', 'attended')
-    .order('created_at', { ascending: false });
-
-  if (error) { list.innerHTML = '<p class="empty-note">Could not load check-ins.</p>'; return; }
-  if (!data || !data.length) { list.innerHTML = '<p class="empty-note">No check-ins yet for this session.</p>'; return; }
-
-  list.innerHTML = data.map(row => renderLogRow(
-    { full_name: row.profiles ? row.profiles.full_name : 'Student' }, 'ok', null, row.created_at
-  )).join('');
-}
-
-function addLogRow(profile, kind, note){
-  const list = document.getElementById('logList');
-  const empty = list.querySelector('.empty-note');
-  if (empty) empty.remove();
-  list.insertAdjacentHTML('afterbegin', renderLogRow(profile, kind, note, new Date().toISOString()));
-}
-
-function renderLogRow(profile, kind, note, when){
-  const name = profile ? (profile.full_name || 'Unnamed') : (note || 'Unknown');
-  const initial = name.trim().charAt(0).toUpperCase() || '?';
-  const badgeText = kind === 'ok' ? 'Present' : kind === 'dup' ? 'Already in' : 'Error';
-  const time = new Date(when).toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'});
-  return `
-    <div class="log-row">
-      <div class="log-main">
-        <div class="log-avatar">${escapeHtml(initial)}</div>
-        <div>
-          <div class="log-name">${escapeHtml(name)}</div>
-          <div class="log-time">${time}</div>
-        </div>
-      </div>
-      <span class="log-badge ${kind}">${badgeText}</span>
-    </div>`;
-}
-
-/* ============================================================
-   UTIL
-   ============================================================ */
-function escapeHtml(str){
-  return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
-</script>
+<script src="admin.js"></script>
 </body>
 </html>
