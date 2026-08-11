@@ -33,8 +33,19 @@ button{font-family:inherit;cursor:pointer;}
 
 /* ---- Shell ---- */
 .app{min-height:100vh;}
+html,body{overflow-x:hidden;max-width:100%;}
 .sidebar{width:230px;flex-shrink:0;background:var(--bg-deep);border-right:1px solid var(--line);
-  display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;padding:18px 14px;}
+  display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;padding:18px 14px;
+  transition:transform .25s ease;z-index:40;}
+.scrim{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:35;}
+.scrim.show{display:block;}
+.hamburger{display:none;background:none;border:none;color:var(--text);font-size:20px;padding:4px 6px;}
+@media (max-width:900px){
+  .hamburger{display:block;}
+  .sidebar{position:fixed;left:0;top:0;width:230px;transform:translateX(-100%);
+    box-shadow:20px 0 60px rgba(0,0,0,.4);}
+  .sidebar.mobile-open{transform:translateX(0);}
+}
 .brand{display:flex;flex-direction:column;line-height:1.05;margin-bottom:6px;}
 .brand b{font-family:var(--display);font-weight:700;font-size:16px;color:var(--teal);}
 .brand span{font-family:var(--mono);font-size:8px;letter-spacing:1.4px;color:var(--muted);text-transform:uppercase;margin-top:2px;}
@@ -51,10 +62,12 @@ button{font-family:inherit;cursor:pointer;}
 
 .main{flex:1;min-width:0;}
 .topbar{height:60px;border-bottom:1px solid var(--line);background:var(--bg-deep);display:flex;align-items:center;
-  justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:5;}
+  gap:14px;padding:0 24px;position:sticky;top:0;z-index:5;}
+@media (max-width:640px){.topbar{padding:0 16px;}}
 .topbar-title{font-family:var(--display);font-weight:600;font-size:16px;}
 .content{padding:28px 32px 60px;}
-@media (max-width:640px){.content{padding:20px 16px 48px;} .sidebar{width:180px;}}
+@media (max-width:640px){.content{padding:20px 16px 48px;}}
+.main{min-width:0;}
 
 .page{display:none;} .page.active{display:block;}
 .page-head{margin-bottom:22px;}
@@ -146,7 +159,8 @@ tr:first-child td{border-top:none;}
 </div>
 
 <div class="app" id="appRoot" style="display:flex;">
-  <aside class="sidebar">
+  <div class="scrim" id="scrim"></div>
+  <aside class="sidebar" id="sidebar">
     <div class="brand"><b>RENI</b><span>Admin Console</span></div>
     <span class="role-pill" id="rolePill">—</span>
     <button class="nav-item active" data-page="overview">Overview</button>
@@ -164,7 +178,10 @@ tr:first-child td{border-top:none;}
   </aside>
 
   <div class="main">
-    <header class="topbar"><span class="topbar-title" id="topbarTitle">Overview</span></header>
+    <header class="topbar">
+      <button class="hamburger" id="hamburger" aria-label="Open menu">☰</button>
+      <span class="topbar-title" id="topbarTitle">Overview</span>
+    </header>
     <main class="content">
 
       <!-- OVERVIEW -->
